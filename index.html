@@ -580,7 +580,7 @@ async function loadUserProfile(authUser) {
     email: authUser.email,
     name: profile.full_name || authUser.email,
     dept: profile.department || '',
-    role: profile.role || 'izleyici',
+    role: profile.role,',
     approved: profile.approved || false
   };
 
