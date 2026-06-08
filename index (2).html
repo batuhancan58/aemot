@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.Factory v3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#0b0d12; --surface:#11141c; --card:#181c27; --card2:#1e2233;
+  --border:#242839; --border2:#2e3448;
+  --accent:#f0a500; --accent-dim:#f0a50020;
+  --text:#dde1ee; --muted:#5a6078; --muted2:#7a8099;
+  --danger:#e05555; --success:#3dd68c; --info:#5090f0; --sevk:#9b60f0;
+  --sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+/* ══ AUTH SCREENS ══ */
+#authScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,#161a28 0%,var(--bg) 70%);
+}
+.auth-box{
+  width:400px;background:var(--card);border:1px solid var(--border);
+  border-radius:18px;padding:44px 40px;box-shadow:0 32px 80px #00000077;
+}
+.auth-logo{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;letter-spacing:-1.5px;color:var(--accent);margin-bottom:2px;}
+.auth-sub{color:var(--muted);font-size:13px;margin-bottom:32px;}
+.auth-tabs{display:flex;gap:0;border:1px solid var(--border2);border-radius:9px;overflow:hidden;margin-bottom:28px;}
+.auth-tab{flex:1;padding:10px;font-size:13px;border:none;background:transparent;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
+.auth-tab.active{background:var(--accent);color:#000;font-weight:700;}
+.field-label{display:block;font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px;}
+.field-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);
+  padding:12px 14px;border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;
+  outline:none;transition:.2s;margin-bottom:14px;
+}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #f0a50018;}
+.field-input option{background:var(--card);}
+.btn-auth{
+  width:100%;padding:13px;background:var(--accent);color:#000;border:none;
+  border-radius:9px;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;
+  cursor:pointer;transition:.2s;margin-top:4px;
+}
+.btn-auth:hover{background:#ffc030;transform:translateY(-1px);}
+.btn-auth:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.auth-msg{font-size:12px;text-align:center;margin-top:14px;}
+.auth-link{color:var(--accent);cursor:pointer;text-decoration:underline;background:none;border:none;font-size:12px;font-family:'DM Sans',sans-serif;}
+.auth-notice{background:#f0a50009;border:1px solid #f0a50025;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted2);margin-top:12px;line-height:1.6;}
+.auth-error{background:#e0555512;border:1px solid #e0555530;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--danger);margin-bottom:12px;display:none;}
+
+/* ══ PENDING / RESET ══ */
+.center-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.info-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:440px;text-align:center;}
+.info-icon{font-size:48px;margin-bottom:16px;}
+.info-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.info-text{color:var(--muted2);font-size:14px;line-height:1.7;margin-bottom:20px;}
+
+/* ══ APP LAYOUT ══ */
+#app{display:none;height:100vh;flex-direction:column;}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:50;
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--accent);letter-spacing:-1px;}
+.ver{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:4px;vertical-align:middle;}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:13px;}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;font-family:'Syne',sans-serif;flex-shrink:0;}
+.chip-name{font-weight:500;}
+.chip-dept{color:var(--muted);font-size:12px;}
+.chip-role{font-size:11px;color:var(--muted);border-left:1px solid var(--border2);padding-left:8px;font-family:'DM Mono',monospace;}
+.btn-logout{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;margin-left:6px;padding:4px;transition:.2s;border-radius:6px;}
+.btn-logout:hover{color:var(--danger);background:#e0555510;}
+
+/* ══ BODY ══ */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+#sidebar{width:var(--sidebar);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.sb-section{padding:16px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-radius:8px;margin:1px 6px;font-size:13px;color:var(--muted2);transition:.15s;border:1px solid transparent;}
+.sb-item:hover{background:var(--card);color:var(--text);}
+.sb-item.active{background:var(--card2);color:var(--accent);border-color:var(--border2);}
+.sb-item .sb-icon{font-size:15px;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--border2);color:var(--muted2);font-size:10px;padding:2px 7px;border-radius:99px;font-family:'DM Mono',monospace;}
+.sb-badge.acil{background:#e0555520;color:var(--danger);}
+.sb-divider{height:1px;background:var(--border);margin:8px 12px;}
+
+/* ══ MAIN ══ */
+#mainContent{flex:1;overflow-y:auto;padding:24px 28px;}
+.page{display:none;}
+.page.active{display:block;}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.page-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;}
+.page-title em{color:var(--accent);font-style:normal;}
+
+/* ══ BUTTONS ══ */
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#000;font-weight:700;}
+.btn-primary:hover{background:#ffc030;}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:#e0555518;color:var(--danger);border:1px solid #e0555530;}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-success{background:#3dd68c18;color:var(--success);border:1px solid #3dd68c30;}
+.btn-success:hover{background:var(--success);color:#000;}
+.btn-info{background:#5090f018;color:var(--info);border:1px solid #5090f030;}
+.btn-warn{background:#f0a50015;color:var(--accent);border:1px solid #f0a50030;}
+
+/* ══ FILTERS ══ */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.fbtn{padding:6px 13px;border-radius:99px;font-size:12px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;}
+.fbtn:hover,.fbtn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.fbtn.on-acil{border-color:var(--danger);color:var(--danger);background:#e0555512;}
+.fbtn.on-devam{border-color:var(--info);color:var(--info);background:#5090f012;}
+.fbtn.on-sevk{border-color:var(--sevk);color:var(--sevk);background:#9b60f012;}
+
+/* ══ TASK CARD ══ */
+.task-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--border2);border-radius:11px;padding:16px 18px;margin-bottom:9px;transition:.2s;}
+.task-card.s-devam{border-left-color:var(--info);}
+.task-card.s-sevk{border-left-color:var(--sevk);}
+.task-card.s-bekliyor{border-left-color:var(--border2);}
+.task-card.p-acil{border-left-color:var(--danger)!important;}
+.task-content{font-size:14px;line-height:1.65;margin-bottom:10px;}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.badge{padding:3px 9px;border-radius:99px;font-size:11px;border:1px solid transparent;font-weight:500;}
+.bd{background:#5090f012;color:var(--info);border-color:#5090f025;}
+.ba{background:#e0555512;color:var(--danger);border-color:#e0555525;}
+.bs{background:#9b60f012;color:var(--sevk);border-color:#9b60f025;}
+.bv{background:#5090f012;color:var(--info);border-color:#5090f025;}
+.bdue-ok{background:#3dd68c12;color:var(--success);padding:3px 9px;border-radius:99px;font-size:11px;}
+.bdue-soon{background:#f0a50015;color:var(--accent);padding:3px 9px;border-radius:99px;font-size:11px;}
+.bdue-over{background:#e0555515;color:var(--danger);padding:3px 9px;border-radius:99px;font-size:11px;}
+.bassign{background:var(--surface);color:var(--muted2);border:1px solid var(--border2);padding:3px 9px;border-radius:99px;font-size:11px;}
+.bupd{margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.task-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* ══ FORWARD PANEL ══ */
+.fp{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:14px;margin-top:10px;display:none;}
+.fp.open{display:block;}
+.fp-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
+.fp-grid .field-input{margin-bottom:0;}
+.fp-full{grid-column:1/-1;}
+.fp label{display:block;font-size:10px;font-weight:600;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ══ MEETING CARD ══ */
+.meeting-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px 20px;margin-bottom:10px;cursor:pointer;transition:.2s;}
+.meeting-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.mc-date{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--accent);}
+.mc-by{font-size:12px;color:var(--muted);}
+.mc-stats{display:flex;gap:8px;flex-wrap:wrap;}
+.sp{padding:3px 10px;border-radius:99px;font-size:11px;}
+.sp-t{background:#f0a50012;color:var(--accent);}
+.sp-ok{background:#3dd68c12;color:var(--success);}
+.sp-a{background:#e0555512;color:var(--danger);}
+.sp-d{background:#5090f012;color:var(--info);}
+
+/* ══ DEPT CARD ══ */
+.dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.dept-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;}
+.dc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;}
+.prog-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:.6s;}
+.dc-nums{font-size:11px;color:var(--muted);}
+
+/* ══ CALENDAR ══ */
+.cal-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.cal-nav{display:flex;align-items:center;gap:8px;}
+.cal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;min-width:180px;}
+.toggle-group{display:flex;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+.tg-btn{padding:7px 14px;font-size:12px;border:none;background:transparent;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
+.tg-btn.active{background:var(--accent);color:#000;font-weight:700;}
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.week-day{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:120px;}
+.wd-header{font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.wd-date{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+.wd-date.today{color:var(--accent);}
+.wd-task{font-size:11px;padding:4px 8px;border-radius:6px;margin-bottom:4px;cursor:pointer;background:var(--surface);border:1px solid var(--border2);line-height:1.4;transition:.15s;}
+.wd-task:hover{border-color:var(--accent);}
+.wd-task.p-acil{border-left:2px solid var(--danger);}
+.wd-empty{font-size:11px;color:var(--muted);font-style:italic;}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.month-header{text-align:center;font-size:11px;font-weight:600;color:var(--muted2);padding:6px 0;text-transform:uppercase;letter-spacing:.5px;}
+.month-day{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;min-height:90px;}
+.month-day.other-month{opacity:.35;}
+.month-day.today{border-color:var(--accent);}
+.md-num{font-size:12px;font-weight:700;margin-bottom:5px;font-family:'Syne',sans-serif;}
+.md-num.today-num{color:var(--accent);}
+.md-dot{font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:2px;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;}
+.md-dot.p-acil{background:#e0555515;color:var(--danger);}
+.md-dot.s-devam{background:#5090f012;color:var(--info);}
+.md-dot.s-bekliyor{background:var(--surface);color:var(--muted2);}
+.md-dot.s-sevk{background:#9b60f012;color:var(--sevk);}
+
+/* ══ NEW MEETING ══ */
+.form-box{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:26px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.row2 .field-input{margin-bottom:0;}
+.ti-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+.ti-row textarea{flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:46px;transition:.2s;}
+.ti-row textarea:focus{border-color:var(--accent);}
+.ti-row select{margin-bottom:0;font-size:12px;}
+.ti-priority{width:90px;}
+
+/* ══ ADMIN PANEL ══ */
+.user-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.ur-info{flex:1;}
+.ur-name{font-size:14px;font-weight:500;}
+.ur-meta{font-size:12px;color:var(--muted2);margin-top:2px;}
+.ur-actions{display:flex;gap:6px;align-items:center;}
+.role-select{background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.pending-badge{background:#f0a50015;color:var(--accent);border:1px solid #f0a50030;padding:3px 9px;border-radius:99px;font-size:11px;}
+.approved-badge{background:#3dd68c12;color:var(--success);border:1px solid #3dd68c25;padding:3px 9px;border-radius:99px;font-size:11px;}
+
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:#00000099;z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
+
+/* ══ MISC ══ */
+.loading{text-align:center;color:var(--muted);padding:40px;font-size:13px;}
+.empty{text-align:center;color:var(--muted);padding:50px 20px;}
+.ei{font-size:36px;margin-bottom:10px;}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;transform:translateY(60px);opacity:0;transition:.3s;pointer-events:none;max-width:300px;}
+#toast.show{transform:translateY(0);opacity:1;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:700px){
+  #sidebar{display:none;}
+  #mainContent{padding:16px;}
+  .week-grid{grid-template-columns:1fr 1fr;}
+  .row2{grid-template-columns:1fr;}
+  .fp-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">C.Factory</div>
+    <div class="auth-sub">Üretim Toplantı Takip Sistemi · v3.0</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('login',this)">Giriş Yap</button>
+      <button class="auth-tab" onclick="showAuthTab('register',this)">Kayıt Ol</button>
+      <button class="auth-tab" onclick="showAuthTab('reset',this)">Şifremi Unuttum</button>
+    </div>
+
+    <div id="authError" class="auth-error"></div>
+
+    <!-- LOGIN -->
+    <div id="tab-login">
+      <label class="field-label">E-posta</label>
+      <input class="field-input" type="email" id="lEmail" placeholder="ornek@sirket.com" autocomplete="email">
+      <label class="field-label">Şifre</label>
+      <input class="field-input" type="password" id="lPass" placeholder="••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-auth" id="btnLogin" onclick="doLogin()">Giriş Yap →</button>
+      <div class="auth-msg" style="margin-top:10px;">
+        Hesabın yok mu? <button class="auth-link" onclick="showAuthTab('register',document.querySelectorAll('.auth-tab')[1])">Kayıt ol</button>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="tab-register" style="display:none">
+      <label class="field-label">Ad Soyad</label>
+      <input class="field-input" type="text" id="rName" placeholder="Ahmet Yılmaz">
+      <label class="field-label">E-posta</label>
+      <input class="field-input" type="email" id="rEmail" placeholder="ornek@sirket.com">
+      <label class="field-label">Bölüm</label>
+      <select class="field-input" id="rDept"><option value="">— Bölüm Seçin —</option></select>
+      <label class="field-label">Şifre</label>
+      <input class="field-input" type="password" id="rPass" placeholder="En az 6 karakter">
+      <button class="btn-auth" id="btnRegister" onclick="doRegister()">Kayıt Ol →</button>
+      <div class="auth-notice">
+        ⏳ Kayıt sonrası hesabınız admin onayına gönderilecektir. Onaylanana kadar görüntüleme modunda kalırsınız.
+      </div>
+    </div>
+
+    <!-- RESET -->
+    <div id="tab-reset" style="display:none">
+      <label class="field-label">E-posta Adresiniz</label>
+      <input class="field-input" type="email" id="resetEmail" placeholder="ornek@sirket.com">
+      <button class="btn-auth" id="btnReset" onclick="doReset()">Şifre Sıfırlama Maili Gönder →</button>
+      <div class="auth-notice" id="resetMsg" style="display:none;">
+        ✅ Şifre sıfırlama bağlantısı e-postanıza gönderildi. Gelen kutunuzu kontrol edin.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="logo">C.Factory<span class="ver">v3.0</span></div>
+    </div>
+    <div class="user-chip">
+      <div class="avatar" id="hAvatar"></div>
+      <span class="chip-name" id="hName"></span>
+      <span class="chip-dept" id="hDept"></span>
+      <span class="chip-role" id="hRole"></span>
+      <button class="btn-logout" onclick="doLogout()" title="Çıkış">⏻</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <div id="sidebar">
+      <div class="sb-section">Ana Görünüm</div>
+      <div class="sb-item active" id="sbToday" onclick="showPage('today',this)">
+        <span class="sb-icon">📋</span> Bugün
+        <span class="sb-badge acil" id="sbAcilBadge" style="display:none">!</span>
+      </div>
+      <div class="sb-item" id="sbHistory" onclick="showPage('history',this)">
+        <span class="sb-icon">🗂</span> Geçmiş
+      </div>
+      <div class="sb-item" id="sbDepts" onclick="showPage('depts',this)">
+        <span class="sb-icon">📊</span> Bölüm Özeti
+      </div>
+      <div class="sb-item editor-only" id="sbNew" onclick="showPage('new',this)" style="display:none">
+        <span class="sb-icon">➕</span> Toplantı Ekle
+      </div>
+      <div class="sb-item admin-only" id="sbAdmin" onclick="showPage('admin',this)" style="display:none">
+        <span class="sb-icon">⚙️</span> Kullanıcılar
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">Bölümler</div>
+      <div id="deptLinks"></div>
+    </div>
+
+    <div id="mainContent">
+
+      <!-- TODAY -->
+      <div class="page active" id="page-today">
+        <div class="page-head">
+          <div class="page-title">Bugünün <em>Görevleri</em></div>
+          <span id="todayDateLabel" style="font-size:13px;color:var(--muted);"></span>
+        </div>
+        <div class="filters">
+          <button class="fbtn on" onclick="filterToday('hepsi',this)">Hepsi</button>
+          <button class="fbtn" onclick="filterToday('acil',this)">🔴 Acil</button>
+          <button class="fbtn" onclick="filterToday('devam',this)">🔵 Devam</button>
+          <button class="fbtn" onclick="filterToday('bekliyor',this)">⏳ Bekliyor</button>
+          <button class="fbtn" onclick="filterToday('sevk',this)">📤 Sevk</button>
+        </div>
+        <div id="todayList"><div class="loading">Yükleniyor…</div></div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="page" id="page-history">
+        <div class="page-head"><div class="page-title">Geçmiş <em>Toplantılar</em></div></div>
+        <div id="historyList"><div class="loading">Yükleniyor…</div></div>
+      </div>
+
+      <!-- DEPTS OVERVIEW -->
+      <div class="page" id="page-depts">
+        <div class="page-head"><div class="page-title">Bölüm <em>Özeti</em></div></div>
+        <div id="deptsGrid" class="dept-grid"><div class="loading">Yükleniyor…</div></div>
+      </div>
+
+      <!-- NEW MEETING -->
+      <div class="page" id="page-new">
+        <div class="page-head"><div class="page-title">Yeni <em>Toplantı</em></div></div>
+        <div class="form-box">
+          <div class="row2">
+            <div>
+              <label class="field-label">Başlık</label>
+              <input class="field-input" type="text" id="newTitle" placeholder="Üretim Toplantısı">
+            </div>
+            <div>
+              <label class="field-label">Tarih</label>
+              <input class="field-input" type="date" id="newDate">
+            </div>
+          </div>
+          <label class="field-label">Görevler / Aksiyon Maddeleri</label>
+          <div id="tiContainer"></div>
+          <button class="btn btn-ghost" onclick="addTI()" style="margin-top:6px;">+ Görev Ekle</button>
+          <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveMeeting()">💾 Kaydet & Yayınla</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEPT PAGE -->
+      <div class="page" id="page-dept">
+        <div class="page-head">
+          <div class="page-title" id="deptPageTitle">Bölüm</div>
+          <div class="toggle-group">
+            <button class="tg-btn active" id="tgWeek" onclick="setCalView('week')">Haftalık</button>
+            <button class="tg-btn" id="tgMonth" onclick="setCalView('month')">Aylık</button>
+          </div>
+        </div>
+        <div class="cal-toolbar">
+          <div class="cal-nav">
+            <button class="btn btn-ghost" onclick="calNav(-1)">‹</button>
+            <div class="cal-title" id="calTitle"></div>
+            <button class="btn btn-ghost" onclick="calNav(1)">›</button>
+            <button class="btn btn-ghost" onclick="calToday()">Bugün</button>
+          </div>
+        </div>
+        <div id="calContainer"></div>
+        <div style="margin-top:24px;">
+          <div class="page-title" style="font-size:16px;margin-bottom:14px;">Tüm <em>Açık Görevler</em></div>
+          <div id="deptTaskList"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN PANEL -->
+      <div class="page" id="page-admin">
+        <div class="page-head">
+          <div class="page-title">Kullanıcı <em>Yönetimi</em></div>
+          <button class="btn btn-ghost" onclick="loadAdminUsers()">↻ Yenile</button>
+        </div>
+        <div id="adminPendingSection" style="margin-bottom:24px;display:none;">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">⏳ Onay Bekleyenler</div>
+          <div id="adminPendingList"></div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Tüm Kullanıcılar</div>
+          <div id="adminUserList"><div class="loading">Yükleniyor…</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://uyvbutaozsybpjvmahqf.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5dmJ1dGFvenN5YnBqdm1haHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzQyNzAsImV4cCI6MjA5NjUxMDI3MH0.xPsAQo-PwOe1oGBrp8rxBGdeG0u71fjmvE2i7UdjCuU';
+// ════════════════════════════════════════════════════════
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const DEPTS = [
+  'AR-GE','Kesici Pres','Enjeksiyon','Bobinaj','Talaşlı 1','Talaşlı 2',
+  'Montaj','Üretim','Planlama','Nordex','Satış','Orta Gerilim',
+  'Kalite','Bakım','Lojistik','Satın Alma','İK','Muhasebe','Genel Müdürlük','Diğer'
+];
+
+let cu = null; // { id, email, name, dept, role, approved }
+let todayFilter = 'hepsi';
+let allTodayTasks = [];
+let realtimeCh = null;
+let calView = 'week';
+let calDate = new Date();
+let activeDept = null;
+let deptAllTasks = [];
+let tiCount = 0;
+
+// ── INIT ──
+(async function(){
+  const sel = document.getElementById('rDept');
+  DEPTS.forEach(d => sel.innerHTML += `<option value="${d}">${d}</option>`);
+  document.getElementById('newDate').value = new Date().toISOString().split('T')[0];
+
+  // Şifre sıfırlama URL'si mi?
+  const hash = window.location.hash;
+  if (hash.includes('type=recovery')) {
+    showPasswordResetForm();
+    return;
+  }
+
+  // Oturum var mı kontrol et
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await loadUserProfile(session.user);
+  }
+})();
+
+// ── AUTH TABS ──
+function showAuthTab(tab, btn) {
+  ['login','register','reset'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? '' : 'none';
+  });
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('authError').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── REGISTER ──
+async function doRegister() {
+  const name = document.getElementById('rName').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const dept = document.getElementById('rDept').value;
+  const pass = document.getElementById('rPass').value;
+  if (!name || !email || !dept || !pass) { showError('Tüm alanları doldurun!'); return; }
+  if (pass.length < 6) { showError('Şifre en az 6 karakter olmalı!'); return; }
+
+  const btn = document.getElementById('btnRegister');
+  btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+
+  const { data, error } = await db.auth.signUp({
+    email, password: pass,
+    options: { data: { full_name: name, department: dept } }
+  });
+
+  if (error) {
+    showError(error.message === 'User already registered' ? 'Bu e-posta zaten kayıtlı!' : error.message);
+    btn.disabled = false; btn.textContent = 'Kayıt Ol →';
+    return;
+  }
+
+  // Profil oluştur
+  if (data.user) {
+    await db.from('user_profiles').upsert({
+      id: data.user.id,
+      full_name: name,
+      department: dept,
+      role: 'izleyici',
+      approved: false
+    });
+  }
+
+  btn.disabled = false; btn.textContent = 'Kayıt Ol →';
+  document.getElementById('authError').style.display = 'none';
+  showAuthTab('login', document.querySelectorAll('.auth-tab')[0]);
+  toast('✅ Kayıt başarılı! Admin onayından sonra tam erişim sağlarsınız.');
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass = document.getElementById('lPass').value;
+  if (!email || !pass) { showError('E-posta ve şifre girin!'); return; }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true; btn.textContent = 'Giriş yapılıyor…';
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    showError('E-posta veya şifre hatalı!');
+    btn.disabled = false; btn.textContent = 'Giriş Yap →';
+    return;
+  }
+
+  btn.disabled = false; btn.textContent = 'Giriş Yap →';
+  await loadUserProfile(data.user);
+}
+
+// ── LOAD PROFILE ──
+async function loadUserProfile(authUser) {
+  let { data: profile } = await db.from('user_profiles').select('*').eq('id', authUser.id).single();
+
+  if (!profile) {
+    // İlk girişte profil yoksa oluştur (email confirmation sonrası)
+    const meta = authUser.user_metadata || {};
+    profile = {
+      id: authUser.id,
+      full_name: meta.full_name || authUser.email,
+      department: meta.department || 'Diğer',
+      role: 'izleyici',
+      approved: false
+    };
+    await db.from('user_profiles').upsert(profile);
+  }
+
+  cu = {
+    id: authUser.id,
+    email: authUser.email,
+    name: profile.full_name || authUser.email,
+    dept: profile.department || '',
+    role: profile.role || 'izleyici',
+    approved: profile.approved || false
+  };
+
+  startApp();
+}
+
+// ── PASSWORD RESET REQUEST ──
+async function doReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showError('E-posta adresinizi girin!'); return; }
+
+  const btn = document.getElementById('btnReset');
+  btn.disabled = true; btn.textContent = 'Gönderiliyor…';
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href.split('#')[0]
+  });
+
+  btn.disabled = false; btn.textContent = 'Şifre Sıfırlama Maili Gönder →';
+
+  if (error) { showError(error.message); return; }
+  document.getElementById('resetMsg').style.display = 'block';
+}
+
+// ── PASSWORD RESET FORM (redirect'ten sonra) ──
+function showPasswordResetForm() {
+  document.getElementById('authScreen').innerHTML = `
+    <div class="auth-box">
+      <div class="auth-logo">C.Factory</div>
+      <div class="auth-sub">Yeni şifrenizi belirleyin</div>
+      <div id="authError" class="auth-error"></div>
+      <label class="field-label">Yeni Şifre</label>
+      <input class="field-input" type="password" id="newPassInput" placeholder="En az 6 karakter">
+      <label class="field-label">Şifre Tekrar</label>
+      <input class="field-input" type="password" id="newPassInput2" placeholder="Tekrar girin">
+      <button class="btn-auth" onclick="doUpdatePassword()">Şifreyi Güncelle →</button>
+    </div>`;
+}
+
+async function doUpdatePassword() {
+  const p1 = document.getElementById('newPassInput').value;
+  const p2 = document.getElementById('newPassInput2').value;
+  if (p1.length < 6) { showError('Şifre en az 6 karakter!'); return; }
+  if (p1 !== p2) { showError('Şifreler eşleşmiyor!'); return; }
+
+  const { error } = await db.auth.updateUser({ password: p1 });
+  if (error) { showError(error.message); return; }
+  toast('✅ Şifre güncellendi!');
+  setTimeout(() => window.location.href = window.location.pathname, 2000);
+}
+
+// ── LOGOUT ──
+async function doLogout() {
+  await db.auth.signOut();
+  cu = null;
+  if (realtimeCh) db.removeChannel(realtimeCh);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  // Tab sıfırla
+  showAuthTab('login', document.querySelectorAll('.auth-tab')[0]);
+}
+
+// ── START APP ──
+function startApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  const av = cu.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('hAvatar').textContent = av;
+  document.getElementById('hName').textContent = cu.name;
+  document.getElementById('hDept').textContent = '· ' + cu.dept;
+  const roleLabels = {izleyici:'İzleyici', editor:'Editör', admin:'Admin'};
+  document.getElementById('hRole').textContent = roleLabels[cu.role] || cu.role;
+  document.getElementById('todayDateLabel').textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Rol bazlı menü
+  if (cu.role === 'editor' || cu.role === 'admin') {
+    document.querySelectorAll('.editor-only').forEach(e=>e.style.display='');
+  }
+  if (cu.role === 'admin') {
+    document.querySelectorAll('.admin-only').forEach(e=>e.style.display='');
+  }
+
+  buildDeptLinks();
+  subscribeRealtime();
+  loadToday();
+}
+
+// ── DEPT LINKS ──
+function buildDeptLinks() {
+  document.getElementById('deptLinks').innerHTML = DEPTS.map(d =>
+    `<div class="sb-item" id="sbDept-${esc(d)}" onclick="openDeptPage('${esc(d)}',this)">
+      <span class="sb-icon">🏭</span> ${d}
+    </div>`).join('');
+}
+
+// ── REALTIME ──
+function subscribeRealtime() {
+  realtimeCh = db.channel('cf-rt-v3')
+    .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>{
+      loadToday();
+      if (activeDept) loadDeptPage(activeDept);
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>{ loadToday(); })
+    .subscribe();
+}
+
+// ── PAGE ROUTING ──
+function showPage(id, sbEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (sbEl) sbEl.classList.add('active');
+  if (id === 'history') loadHistory();
+  if (id === 'depts') loadDeptsOverview();
+  if (id === 'new') initNewMeeting();
+  if (id === 'admin') loadAdminUsers();
+}
+
+function openDeptPage(dept, sbEl) {
+  activeDept = dept;
+  calDate = new Date();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-dept').classList.add('active');
+  if (sbEl) sbEl.classList.add('active');
+  document.getElementById('deptPageTitle').innerHTML = `<em>${dept}</em> Bölümü`;
+  loadDeptPage(dept);
+}
+
+// ══════════════════════════════════════
+// TODAY
+// ══════════════════════════════════════
+async function loadToday() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data: meetings } = await db.from('meetings').select('*').eq('meeting_date',today).order('created_at',{ascending:false});
+  const container = document.getElementById('todayList');
+  if (!meetings?.length) {
+    allTodayTasks = [];
+    container.innerHTML = '<div class="empty"><div class="ei">📋</div>Bugün toplantı kaydı yok.<br><small>Editör veya Admin yeni toplantı ekleyebilir.</small></div>';
+    updateAcilBadge(0); return;
+  }
+  const ids = meetings.map(m=>m.id);
+  const { data: tasks } = await db.from('tasks').select('*').in('meeting_id',ids)
+    .not('status','eq','arsiv').order('created_at');
+  allTodayTasks = tasks || [];
+  renderToday();
+  updateAcilBadge(allTodayTasks.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi').length);
+}
+
+function updateAcilBadge(n) {
+  const b = document.getElementById('sbAcilBadge');
+  b.style.display = n ? '' : 'none';
+  b.textContent = n;
+}
+
+function renderToday() {
+  const c = document.getElementById('todayList');
+  let list = allTodayTasks.filter(t=>t.status!=='tamamlandi');
+  if (todayFilter==='acil') list = list.filter(t=>t.priority==='acil');
+  else if (todayFilter!=='hepsi') list = list.filter(t=>t.status===todayFilter);
+  if (!list.length) { c.innerHTML='<div class="empty"><div class="ei">✅</div>Bu filtrede görev yok.</div>'; return; }
+  c.innerHTML = list.map(t=>taskHTML(t,true)).join('');
+}
+
+function filterToday(f, btn) {
+  todayFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on','on-acil','on-devam','on-sevk'));
+  btn.classList.add(f==='acil'?'on-acil':f==='devam'?'on-devam':f==='sevk'?'on-sevk':'on');
+  renderToday();
+}
+
+// ══════════════════════════════════════
+// TASK HTML
+// ══════════════════════════════════════
+function taskHTML(t, interactive) {
+  const canEdit = interactive && cu && (cu.role==='editor'||cu.role==='admin');
+  let meta = '';
+  if (t.department) meta += `<span class="badge bd">🏭 ${esc(t.department)}</span>`;
+  if (t.priority==='acil') meta += `<span class="badge ba">🔴 ACİL</span>`;
+  if (t.status==='devam') meta += `<span class="badge bv">🔵 Devam</span>`;
+  if (t.status==='sevk') meta += `<span class="badge bs">📤 → ${esc(t.forwarded_to||'')}</span>`;
+  if (t.assigned_to) meta += `<span class="bassign">👤 ${esc(t.assigned_to)}</span>`;
+  if (t.due_date) {
+    const diff = Math.ceil((new Date(t.due_date)-new Date())/86400000);
+    const cls = diff<0?'bdue-over':diff<=2?'bdue-soon':'bdue-ok';
+    const lbl = diff<0?`⚠️ ${Math.abs(diff)}g gecikti`:diff===0?'⏰ Bugün':`📅 ${t.due_date}`;
+    meta += `<span class="${cls}">${lbl}</span>`;
+  }
+  if (t.updated_by) meta += `<span class="bupd">↺ ${esc(t.updated_by)}</span>`;
+
+  let actions = '';
+  if (canEdit) {
+    actions = `<div class="task-actions">
+      <button class="btn btn-success" onclick="setStatus('${t.id}','tamamlandi')">✅ Tamamlandı</button>
+      ${t.status!=='devam'
+        ? `<button class="btn btn-info" onclick="setStatus('${t.id}','devam')">🔵 Devam Ediyor</button>`
+        : `<button class="btn btn-ghost" onclick="setStatus('${t.id}','bekliyor')">↩ Bekliyor</button>`}
+      ${t.priority==='acil'
+        ? `<button class="btn btn-ghost" onclick="setPrio('${t.id}','normal')">🔴 Acil Kaldır</button>`
+        : `<button class="btn btn-danger" onclick="setPrio('${t.id}','acil')">🔴 Acil</button>`}
+      <button class="btn btn-ghost" onclick="toggleFP('${t.id}')">📤 Sevk</button>
+    </div>
+    <div class="fp" id="fp-${t.id}">
+      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;">Sevk Bilgileri</div>
+      <div class="fp-grid">
+        <div><label>Bölüm</label><select class="field-input" id="fd-${t.id}">${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select></div>
+        <div><label>Sorumlu</label><input class="field-input" type="text" id="fp-${t.id}-p" placeholder="Ad Soyad"></div>
+        <div><label>Termin</label><input class="field-input" type="date" id="fp-${t.id}-d"></div>
+        <div class="fp-full"><label>Not</label><input class="field-input" type="text" id="fp-${t.id}-n" placeholder="Açıklama"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-primary" onclick="doFwd('${t.id}')">Sevk Et</button>
+        <button class="btn btn-ghost" onclick="toggleFP('${t.id}')">İptal</button>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="task-card s-${t.status} p-${t.priority}" id="tc-${t.id}">
+    <div class="task-content">${esc(t.content)}</div>
+    <div class="task-meta">${meta}</div>
+    ${actions}
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// TASK ACTIONS
+// ══════════════════════════════════════
+async function setStatus(id, status) {
+  const upd = { status, updated_by: cu.name, updated_at: new Date().toISOString() };
+  if (status==='tamamlandi') upd.completed_at = new Date().toISOString();
+  await db.from('tasks').update(upd).eq('id',id);
+  toast(status==='tamamlandi'?'✅ Tamamlandı — arşive taşındı':'Durum güncellendi');
+}
+async function setPrio(id, priority) {
+  await db.from('tasks').update({priority, updated_by:cu.name}).eq('id',id);
+  toast(priority==='acil'?'🔴 Acil işaretlendi':'Acil kaldırıldı');
+}
+function toggleFP(id) { document.getElementById('fp-'+id)?.classList.toggle('open'); }
+async function doFwd(id) {
+  const dept = document.getElementById('fd-'+id).value;
+  const person = document.getElementById(`fp-${id}-p`).value;
+  const due = document.getElementById(`fp-${id}-d`).value;
+  const note = document.getElementById(`fp-${id}-n`).value;
+  await db.from('tasks').update({
+    status:'sevk', forwarded_to:dept, assigned_to:person,
+    due_date:due||null, notes:note, updated_by:cu.name, updated_at:new Date().toISOString()
+  }).eq('id',id);
+  toast(`📤 ${dept} bölümüne sevk edildi`);
+}
+
+// ══════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════
+async function loadHistory() {
+  const { data: meetings } = await db.from('meetings').select('*').order('meeting_date',{ascending:false}).limit(60);
+  const c = document.getElementById('historyList');
+  if (!meetings?.length) { c.innerHTML='<div class="empty"><div class="ei">🗂</div>Kayıt yok.</div>'; return; }
+  const ids = meetings.map(m=>m.id);
+  const { data: tasks } = await db.from('tasks').select('id,meeting_id,status,priority').in('meeting_id',ids);
+  c.innerHTML = meetings.map(m => {
+    const mt = (tasks||[]).filter(t=>t.meeting_id===m.id);
+    const ok = mt.filter(t=>t.status==='tamamlandi'||t.status==='arsiv').length;
+    const ac = mt.filter(t=>t.priority==='acil').length;
+    const dv = mt.filter(t=>t.status==='devam').length;
+    return `<div class="meeting-card" onclick="showMeetingModal('${m.id}')">
+      <div class="mc-top">
+        <div class="mc-date">${m.meeting_date} — ${esc(m.title)}</div>
+        <div class="mc-by">${esc(m.created_by||'')}</div>
+      </div>
+      <div class="mc-stats">
+        <span class="sp sp-t">📋 ${mt.length}</span>
+        ${ok?`<span class="sp sp-ok">✅ ${ok}</span>`:''}
+        ${dv?`<span class="sp sp-d">🔵 ${dv}</span>`:''}
+        ${ac?`<span class="sp sp-a">🔴 ${ac}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function showMeetingModal(mid) {
+  const { data: m } = await db.from('meetings').select('*').eq('id',mid).single();
+  const { data: tasks } = await db.from('tasks').select('*').eq('meeting_id',mid).order('created_at');
+  const ov = document.createElement('div');
+  ov.className = 'overlay open';
+  ov.innerHTML = `<div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">${esc(m.title)} <span style="color:var(--muted);font-size:13px;">${m.meeting_date}</span></div>
+      <button class="btn btn-ghost" onclick="this.closest('.overlay').remove()">✕</button>
+    </div>
+    ${(tasks||[]).map(t=>taskHTML(t,false)).join('')}
+  </div>`;
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
+
+// ══════════════════════════════════════
+// DEPTS OVERVIEW
+// ══════════════════════════════════════
+async function loadDeptsOverview() {
+  const { data: tasks } = await db.from('tasks').select('department,status').not('status','eq','arsiv');
+  const c = document.getElementById('deptsGrid');
+  if (!tasks) return;
+  const map = {};
+  DEPTS.forEach(d => map[d]={total:0,done:0});
+  tasks.forEach(t => {
+    const d = t.department||'Diğer';
+    if (!map[d]) map[d]={total:0,done:0};
+    map[d].total++;
+    if (t.status==='tamamlandi') map[d].done++;
+  });
+  const list = Object.entries(map).filter(([,v])=>v.total>0).sort((a,b)=>b[1].total-a[1].total);
+  if (!list.length) { c.innerHTML='<div class="empty"><div class="ei">🏭</div>Veri yok.</div>'; return; }
+  c.innerHTML = list.map(([dept,v]) => {
+    const pct = v.total ? Math.round(v.done/v.total*100) : 0;
+    return `<div class="dept-card" onclick="openDeptPage('${esc(dept)}',null)" style="cursor:pointer;">
+      <div class="dc-name">${esc(dept)}</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="dc-nums">${v.done}/${v.total} tamamlandı · %${pct}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// DEPT PAGE + CALENDAR
+// ══════════════════════════════════════
+async function loadDeptPage(dept) {
+  const { data: tasks } = await db.from('tasks').select('*, meetings(meeting_date)')
+    .eq('department',dept).not('status','eq','arsiv').not('status','eq','tamamlandi').order('created_at');
+  deptAllTasks = tasks || [];
+  renderCalendar();
+  renderDeptTaskList();
+}
+
+function renderDeptTaskList() {
+  const c = document.getElementById('deptTaskList');
+  if (!deptAllTasks.length) { c.innerHTML='<div class="empty"><div class="ei">✅</div>Tüm görevler tamamlandı.</div>'; return; }
+  c.innerHTML = deptAllTasks.map(t=>taskHTML(t,true)).join('');
+}
+
+function setCalView(v) {
+  calView=v;
+  document.getElementById('tgWeek').classList.toggle('active',v==='week');
+  document.getElementById('tgMonth').classList.toggle('active',v==='month');
+  renderCalendar();
+}
+function calNav(d) {
+  if (calView==='week') calDate = new Date(calDate.getTime()+d*7*86400000);
+  else { calDate.setMonth(calDate.getMonth()+d); calDate=new Date(calDate); }
+  renderCalendar();
+}
+function calToday() { calDate=new Date(); renderCalendar(); }
+function renderCalendar() { calView==='week' ? renderWeek() : renderMonth(); }
+
+function renderWeek() {
+  const d = new Date(calDate);
+  const day = d.getDay();
+  d.setDate(d.getDate()+(day===0?-6:1-day));
+  const days = Array.from({length:5},(_,i)=>{ const x=new Date(d); x.setDate(d.getDate()+i); return x; });
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('calTitle').textContent = `${days[0].toLocaleDateString('tr-TR',{day:'numeric',month:'long'})} — ${days[4].toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`;
+  const getT = ds => deptAllTasks.filter(t=>t.meetings?.meeting_date===ds||t.due_date===ds);
+  document.getElementById('calContainer').innerHTML = `<div class="week-grid">${days.map(day=>{
+    const ds=day.toISOString().split('T')[0];
+    const isToday=ds===todayStr;
+    const dt=getT(ds);
+    return `<div class="week-day">
+      <div class="wd-header">${day.toLocaleDateString('tr-TR',{weekday:'short'})}</div>
+      <div class="wd-date ${isToday?'today':''}">${day.getDate()}</div>
+      ${dt.length ? dt.map(t=>`<div class="wd-task p-${t.priority} s-${t.status}" title="${esc(t.content)}">${esc(t.content.slice(0,60))}${t.content.length>60?'…':''}</div>`).join('') : '<div class="wd-empty">—</div>'}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderMonth() {
+  const y=calDate.getFullYear(), mo=calDate.getMonth();
+  document.getElementById('calTitle').textContent = new Date(y,mo,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
+  const firstDay=new Date(y,mo,1).getDay();
+  const offset=firstDay===0?6:firstDay-1;
+  const dim=new Date(y,mo+1,0).getDate();
+  const todayStr=new Date().toISOString().split('T')[0];
+  const getT=ds=>deptAllTasks.filter(t=>t.meetings?.meeting_date===ds||t.due_date===ds);
+  const headers=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].map(h=>`<div class="month-header">${h}</div>`).join('');
+  let cells='';
+  for(let i=0;i<offset;i++) cells+=`<div class="month-day other-month"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const dt=getT(ds);
+    cells+=`<div class="month-day ${isToday?'today':''}">
+      <div class="md-num ${isToday?'today-num':''}">${d}</div>
+      ${dt.map(t=>`<div class="md-dot p-${t.priority} s-${t.status}" title="${esc(t.content)}">${esc(t.content.slice(0,22))}…</div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('calContainer').innerHTML=`<div class="month-grid">${headers}${cells}</div>`;
+}
+
+// ══════════════════════════════════════
+// NEW MEETING
+// ══════════════════════════════════════
+function initNewMeeting() {
+  document.getElementById('tiContainer').innerHTML=''; tiCount=0; addTI();
+}
+function addTI() {
+  const id=++tiCount;
+  const div=document.createElement('div');
+  div.className='ti-row'; div.id='ti-'+id;
+  div.innerHTML=`
+    <textarea placeholder="Görev / toplantı notu…"></textarea>
+    <select class="field-input" style="width:140px;"><option value="">Bölüm</option>${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select>
+    <select class="field-input ti-priority"><option value="normal">Normal</option><option value="acil">🔴 Acil</option></select>
+    <button class="btn btn-danger" onclick="document.getElementById('ti-${id}').remove()">✕</button>`;
+  document.getElementById('tiContainer').appendChild(div);
+}
+async function saveMeeting() {
+  const title=document.getElementById('newTitle').value.trim()||'Üretim Toplantısı';
+  const date=document.getElementById('newDate').value;
+  if (!date) { toast('Tarih seçin!','danger'); return; }
+  const rows=document.querySelectorAll('#tiContainer .ti-row');
+  const items=[];
+  rows.forEach(r=>{
+    const txt=r.querySelector('textarea').value.trim();
+    const dept=r.querySelectorAll('select')[0].value;
+    const prio=r.querySelectorAll('select')[1].value;
+    if(txt) items.push({content:txt,department:dept||null,priority:prio});
+  });
+  if (!items.length) { toast('En az 1 görev ekleyin!','danger'); return; }
+  const { data: mtg, error } = await db.from('meetings').insert({title,meeting_date:date,created_by:cu.name}).select().single();
+  if (error) { toast('Hata: '+error.message,'danger'); return; }
+  await db.from('tasks').insert(items.map(i=>({meeting_id:mtg.id,...i,status:'bekliyor'})));
+  toast('✅ Toplantı kaydedildi!');
+  showPage('today',document.getElementById('sbToday'));
+}
+
+// ══════════════════════════════════════
+// ADMIN — USER MANAGEMENT
+// ══════════════════════════════════════
+async function loadAdminUsers() {
+  const { data: users } = await db.from('user_profiles').select('*').order('created_at');
+  const pending = (users||[]).filter(u=>!u.approved);
+  const all = (users||[]);
+
+  const pendSec = document.getElementById('adminPendingSection');
+  const pendList = document.getElementById('adminPendingList');
+  const userList = document.getElementById('adminUserList');
+
+  if (pending.length) {
+    pendSec.style.display='';
+    pendList.innerHTML = pending.map(u=>userRowHTML(u,true)).join('');
+  } else {
+    pendSec.style.display='none';
+  }
+
+  if (!all.length) { userList.innerHTML='<div class="empty">Kullanıcı yok.</div>'; return; }
+  userList.innerHTML = all.map(u=>userRowHTML(u,false)).join('');
+}
+
+function userRowHTML(u, isPending) {
+  const roleOpts = ['izleyici','editor','admin'].map(r=>
+    `<option value="${r}" ${u.role===r?'selected':''}>${r==='izleyici'?'İzleyici':r==='editor'?'Editör':'Admin'}</option>`).join('');
+  const statusBadge = u.approved
+    ? `<span class="approved-badge">✅ Onaylı</span>`
+    : `<span class="pending-badge">⏳ Bekliyor</span>`;
+  const approveBtn = !u.approved
+    ? `<button class="btn btn-success" onclick="approveUser('${u.id}')">✅ Onayla</button>`
+    : '';
+  return `<div class="user-row" id="ur-${u.id}">
+    <div class="avatar" style="width:34px;height:34px;font-size:13px;">${(u.full_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+    <div class="ur-info">
+      <div class="ur-name">${esc(u.full_name||'—')}</div>
+      <div class="ur-meta">${esc(u.department||'—')}</div>
+    </div>
+    ${statusBadge}
+    <div class="ur-actions">
+      <select class="role-select" onchange="changeRole('${u.id}',this.value)">${roleOpts}</select>
+      ${approveBtn}
+      <button class="btn btn-danger" onclick="deleteUser('${u.id}')">🗑</button>
+    </div>
+  </div>`;
+}
+
+async function approveUser(uid) {
+  await db.from('user_profiles').update({approved:true}).eq('id',uid);
+  toast('✅ Kullanıcı onaylandı');
+  loadAdminUsers();
+}
+async function changeRole(uid, role) {
+  await db.from('user_profiles').update({role}).eq('id',uid);
+  toast('Rol güncellendi: '+role);
+}
+async function deleteUser(uid) {
+  if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
+  await db.from('user_profiles').delete().eq('id',uid);
+  toast('Kullanıcı silindi','danger');
+  loadAdminUsers();
+}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = type==='danger'?'var(--danger)':'var(--accent)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+</script>
+</body>
+</html>
