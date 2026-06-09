@@ -1,789 +1,789 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C.Factory v3.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>C.Factory v4</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0b0d12;--surface:#11141c;--card:#181c27;--card2:#1e2233;
-  --border:#242839;--border2:#2e3448;
-  --accent:#f0a500;--adim:#f0a50018;
-  --text:#dde1ee;--muted:#5a6078;--muted2:#7a8099;
-  --danger:#e05555;--success:#3dd68c;--info:#5090f0;--sevk:#9b60f0;
-  --sw:220px;
+  --bg:#f4f3f0;--card:#fff;--border:#e0ddd8;
+  --accent:#1a3a5c;--accent2:#c8401a;
+  --green:#2d7a3a;--gbg:#eaf5ec;
+  --red:#c0392b;--rbg:#fdf0ed;
+  --purple:#7d3c98;--pbg:#f5eef8;
+  --muted:#777;--text:#1a1a1a;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* AUTH */
-.aw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 70% 50% at 50% 0%,#161a28,var(--bg));}
-.ab{width:390px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:44px 40px;box-shadow:0 32px 80px #00000077;}
-.alogo{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;letter-spacing:-1.5px;color:var(--accent);margin-bottom:2px;}
-.asub{color:var(--muted);font-size:13px;margin-bottom:32px;}
-.atabs{display:flex;border:1px solid var(--border2);border-radius:9px;overflow:hidden;margin-bottom:28px;}
-.atab{flex:1;padding:10px;font-size:13px;border:none;background:transparent;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
-.atab.on{background:var(--accent);color:#000;font-weight:700;}
-.fl{display:block;font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
-.fi{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:11px 13px;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:.2s;margin-bottom:14px;}
-.fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px #f0a50015;}
-.fi option{background:var(--card);}
-.btn-auth{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:9px;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:.2s;margin-top:4px;}
-.btn-auth:hover{background:#ffc030;}
-.aerr{background:#e0555515;border:1px solid #e0555530;color:var(--danger);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
-.aok{background:#3dd68c15;border:1px solid #3dd68c30;color:var(--success);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
+/* LOGIN */
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;background:linear-gradient(150deg,#1a3a5c,#0d2340 60%,#c8401a)}
+.logo h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:3px;text-align:center}
+.logo p{color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-top:4px;margin-bottom:2rem}
+.lcard{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.lcard h2{font-size:1rem;color:var(--accent);text-align:center;margin-bottom:1.5rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:0.7rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.fg input,.fg select{width:100%;padding:.65rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;color:var(--text);background:#fff;outline:none;transition:border .2s}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.lbtn{width:100%;padding:.75rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:700;margin-top:.25rem}
+.lbtn:hover{background:#245080}
+.lerr{color:var(--red);font-size:.8rem;text-align:center;margin-top:.5rem;display:none}
 
-/* APP */
-#app{display:none;height:100vh;flex-direction:column;}
-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--accent);letter-spacing:-1px;}
-.ver{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:4px;}
-.uchip{display:flex;align-items:center;gap:8px;font-size:13px;}
-.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;font-family:'Syne',sans-serif;flex-shrink:0;}
-.crole{font-size:11px;color:var(--muted);border-left:1px solid var(--border2);padding-left:8px;font-family:'DM Mono',monospace;}
-.blogout{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;margin-left:6px;padding:4px;transition:.2s;border-radius:6px;}
-.blogout:hover{color:var(--danger);}
+/* LAYOUT */
+#app{display:none;height:100vh;flex-direction:column}
+#hdr{background:var(--accent);color:#fff;padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hbrand{font-size:1.1rem;font-weight:800;letter-spacing:1px}
+.hbrand span{color:#e8a070;font-size:.65rem;vertical-align:super}
+.hright{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.ubadge{background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-size:.72rem}
+.dot{width:7px;height:7px;border-radius:50%;background:#2ecc71;animation:pulse 2s infinite;display:inline-block;margin-right:4px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.lout-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.72rem}
 
-.abody{display:flex;flex:1;overflow:hidden;}
+/* BODY LAYOUT */
+#body{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-#sb{width:var(--sw);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
-.ss{padding:16px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
-.si{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-radius:8px;margin:1px 6px;font-size:13px;color:var(--muted2);transition:.15s;border:1px solid transparent;}
-.si:hover{background:var(--card);color:var(--text);}
-.si.on{background:var(--card2);color:var(--accent);border-color:var(--border2);}
-.sico{font-size:14px;flex-shrink:0;}
-.sbadge{margin-left:auto;background:#e0555520;color:var(--danger);font-size:10px;padding:2px 7px;border-radius:99px;font-family:'DM Mono',monospace;}
-.sdiv{height:1px;background:var(--border);margin:8px 12px;}
+#sidebar{width:210px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column}
+.sb-section{padding:.75rem .75rem .25rem;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:.55rem .85rem;cursor:pointer;font-size:.82rem;color:var(--text);border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{background:var(--bg)}
+.sb-item.active{background:#edf4fc;color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.sb-item .badge{margin-left:auto;background:var(--red);color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700}
+.sb-item .badge.g{background:var(--green)}
 
 /* MAIN */
-#mc{flex:1;overflow-y:auto;padding:24px 28px;}
-.page{display:none;}.page.on{display:block;}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
-.pt{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;}
-.pt em{color:var(--accent);font-style:normal;}
+#main{flex:1;overflow-y:auto;padding:1.25rem}
 
-/* BUTTONS */
-.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;}
-.bp{background:var(--accent);color:#000;font-weight:700;}.bp:hover{background:#ffc030;}
-.bg{background:var(--card2);color:var(--text);border:1px solid var(--border2);}.bg:hover{border-color:var(--accent);color:var(--accent);}
-.bd2{background:#e0555518;color:var(--danger);border:1px solid #e0555530;}.bd2:hover{background:var(--danger);color:#fff;}
-.bsu{background:#3dd68c18;color:var(--success);border:1px solid #3dd68c30;}.bsu:hover{background:var(--success);color:#000;}
-.bi{background:#5090f018;color:var(--info);border:1px solid #5090f030;}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:1.25rem}
+.scard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;text-align:center}
+.snum{font-size:1.5rem;font-weight:800;color:var(--accent)}
+.snum.g{color:var(--green)}.snum.r{color:var(--red)}.snum.o{color:#d68910}.snum.p{color:var(--purple)}
+.slbl{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.ph h2{font-size:1.1rem;color:var(--accent)}
+.ph-sub{font-size:.75rem;color:var(--muted)}
 
 /* FILTERS */
-.frow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
-.fb{padding:6px 13px;border-radius:99px;font-size:12px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;}
-.fb:hover,.fb.on{border-color:var(--accent);color:var(--accent);background:var(--adim);}
-.fb.oa{border-color:var(--danger);color:var(--danger);background:#e0555512;}
-.fb.od{border-color:var(--info);color:var(--info);background:#5090f012;}
-.fb.os{border-color:var(--sevk);color:var(--sevk);background:#9b60f012;}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.fbtn{padding:4px 12px;border-radius:20px;font-size:.73rem;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--muted)}
+.fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* TASK CARD */
-.tc{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--border2);border-radius:11px;padding:16px 18px;margin-bottom:9px;transition:.2s;}
-.tc.sd{border-left-color:var(--info);}
-.tc.ss2{border-left-color:var(--sevk);}
-.tc.pa{border-left-color:var(--danger)!important;}
-.tcont{font-size:14px;line-height:1.65;margin-bottom:10px;}
-.tmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
-.badge{padding:3px 9px;border-radius:99px;font-size:11px;border:1px solid transparent;font-weight:500;}
-.bdp{background:#5090f012;color:var(--info);border-color:#5090f025;}
-.bac{background:#e0555512;color:var(--danger);border-color:#e0555525;}
-.bsv{background:#9b60f012;color:var(--sevk);border-color:#9b60f025;}
-.bdv{background:#5090f012;color:var(--info);border-color:#5090f025;}
-.dok{background:#3dd68c12;color:var(--success);padding:3px 9px;border-radius:99px;font-size:11px;}
-.dsn{background:#f0a50015;color:var(--accent);padding:3px 9px;border-radius:99px;font-size:11px;}
-.dov{background:#e0555515;color:var(--danger);padding:3px 9px;border-radius:99px;font-size:11px;}
-.basgn{background:var(--surface);color:var(--muted2);border:1px solid var(--border2);padding:3px 9px;border-radius:99px;font-size:11px;}
-.bupd{margin-left:auto;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
-.tact{display:flex;gap:6px;flex-wrap:wrap;}
-
-/* FORWARD PANEL */
-.fp{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:14px;margin-top:10px;display:none;}
-.fp.on{display:block;}
-.fpg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
-.fpg .fi{margin-bottom:0;}
-.fpf{grid-column:1/-1;}
-
-/* MEETING CARD */
-.mcard{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px 20px;margin-bottom:10px;cursor:pointer;transition:.2s;}
-.mcard:hover{border-color:var(--accent);transform:translateY(-1px);}
-.mct{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.mdate{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--accent);}
-.mby{font-size:12px;color:var(--muted);}
-.mstats{display:flex;gap:8px;flex-wrap:wrap;}
-.sp{padding:3px 10px;border-radius:99px;font-size:11px;}
-.spt{background:#f0a50012;color:var(--accent);}
-.spok{background:#3dd68c12;color:var(--success);}
-.spa{background:#e0555512;color:var(--danger);}
-.spd{background:#5090f012;color:var(--info);}
-
-/* DEPT GRID */
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
-.dcard{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px;cursor:pointer;transition:.2s;}
-.dcard:hover{border-color:var(--accent);}
-.dcn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;}
-.pb{height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:6px;}
-.pf{height:100%;background:var(--accent);border-radius:99px;transition:.6s;}
-.dcnum{font-size:11px;color:var(--muted);}
-
-/* CALENDAR */
-.ctbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
-.ctitle{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;min-width:200px;}
-.tg{display:flex;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
-.tgb{padding:7px 14px;font-size:12px;border:none;background:transparent;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
-.tgb.on{background:var(--accent);color:#000;font-weight:700;}
-
-.wgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-.wday{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:110px;}
-.wdh{font-size:10px;font-weight:600;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
-.wdd{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;}
-.wdd.td{color:var(--accent);}
-.wtask{font-size:11px;padding:4px 7px;border-radius:6px;margin-bottom:4px;background:var(--surface);border:1px solid var(--border2);line-height:1.4;}
-.wtask.pa{border-left:2px solid var(--danger);}
-.wempty{font-size:11px;color:var(--muted);font-style:italic;}
-
-.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.mghdr{text-align:center;font-size:11px;font-weight:600;color:var(--muted2);padding:6px 0;text-transform:uppercase;letter-spacing:.5px;}
-.mgday{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;min-height:80px;}
-.mgday.oth{opacity:.3;}
-.mgday.tday{border-color:var(--accent);}
-.mgnum{font-size:12px;font-weight:700;margin-bottom:4px;font-family:'Syne',sans-serif;}
-.mgnum.t{color:var(--accent);}
-.mgdot{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.mgdot.pa{background:#e0555515;color:var(--danger);}
-.mgdot.sd{background:#5090f012;color:var(--info);}
-.mgdot.sb{background:var(--surface);color:var(--muted2);}
-.mgdot.ss2{background:#9b60f012;color:var(--sevk);}
+.tcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:.5rem;border-left:3px solid #ddd}
+.tcard.acil{border-left-color:var(--red)}
+.tcard.normal{border-left-color:#3498db}
+.tcard.done{border-left-color:var(--green);opacity:.65}
+.tcard.sevk{border-left-color:var(--purple)}
+.ttop{display:flex;gap:10px;align-items:flex-start}
+.chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;transition:all .15s}
+.chk.done{background:var(--green);border-color:var(--green);color:#fff}
+.chk.sevk{background:var(--purple);border-color:var(--purple);color:#fff}
+.tbody{flex:1}
+.ttext{font-size:.87rem;line-height:1.55}
+.ttext.done{text-decoration:line-through;color:var(--muted)}
+.tmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.tag{font-size:.66rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.t-dept{background:#edf4fc;color:#185FA5}
+.t-acil{background:var(--rbg);color:var(--red)}
+.t-normal{background:#edf4fc;color:#2980b9}
+.t-done{background:var(--gbg);color:var(--green)}
+.t-sevk{background:var(--pbg);color:var(--purple)}
+.t-person{background:#f5f5f5;color:#555}
+.tactions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.abtn{font-size:.7rem;padding:3px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--muted)}
+.abtn.g{border-color:var(--green);color:var(--green);background:var(--gbg)}
+.abtn.p{border-color:var(--purple);color:var(--purple)}
+.abtn.r{border-color:var(--red);color:var(--red)}
+.tfoot{display:flex;justify-content:space-between;align-items:center;margin-top:5px;font-size:.7rem;color:var(--muted)}
+.termin{padding:2px 8px;border-radius:8px;font-size:.66rem;font-weight:600}
+.t-late{background:var(--rbg);color:var(--red)}
+.t-soon{background:#fef9ec;color:#d68910}
+.t-ok{background:var(--gbg);color:var(--green)}
 
 /* FORM */
-.fbox{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:26px;}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-.r2 .fi{margin-bottom:0;}
-.trow{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
-.trow textarea{flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:46px;transition:.2s;}
-.trow textarea:focus{border-color:var(--accent);}
-.trow select{width:140px;margin-bottom:0;font-size:12px;}
+.fcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.fcard h3{font-size:.95rem;color:var(--accent);margin-bottom:1rem}
+.irow{display:flex;gap:.75rem;flex-wrap:wrap}
+.irow .fg{flex:1;min-width:140px}
+textarea{width:100%;padding:.7rem;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;resize:vertical;min-height:80px;color:var(--text);font-family:inherit;outline:none}
+textarea:focus{border-color:var(--accent)}
+.add-row-btn{background:#f0f7ff;border:1px dashed #3498db;color:#2980b9;width:100%;padding:.55rem;border-radius:8px;cursor:pointer;font-size:.82rem;margin-top:.5rem}
+.trow{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+.trow input,.trow select{padding:.48rem .65rem;border:1.5px solid var(--border);border-radius:7px;font-size:.8rem;color:var(--text);background:#fff;font-family:inherit}
+.trow input:focus,.trow select:focus{border-color:var(--accent);outline:none}
+.trow input.big{flex:1;min-width:160px}
+.rm-btn{background:var(--rbg);border:none;color:var(--red);padding:5px 9px;border-radius:6px;cursor:pointer}
+.submit-btn{width:100%;padding:.75rem;background:var(--accent2);color:#fff;border:none;border-radius:9px;font-size:.95rem;cursor:pointer;font-weight:700;margin-top:.75rem}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
 
-/* USERS TABLE */
-.utable{width:100%;border-collapse:collapse;}
-.utable th{text-align:left;font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:1px solid var(--border);}
-.utable td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
-.utable tr:last-child td{border-bottom:none;}
-.rsel{background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;transition:.2s;}
-.rsel:focus{border-color:var(--accent);}
+/* CALENDAR */
+.cal-wrap{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--accent);color:#fff}
+.cal-hdr h3{font-size:.9rem}
+.cal-nav{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:.8rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border)}
+.cal-day-hdr{background:#f8f7f4;padding:6px;text-align:center;font-size:.68rem;color:var(--muted);font-weight:600}
+.cal-day{background:#fff;padding:4px;min-height:70px;position:relative}
+.cal-day.other{background:#fafafa}
+.cal-day.today .dn{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.dn{font-size:.75rem;color:var(--text);margin-bottom:2px}
+.cal-dot{font-size:.65rem;padding:1px 5px;border-radius:4px;margin-bottom:1px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-dot.acil{background:var(--rbg);color:var(--red)}
+.cal-dot.normal{background:#edf4fc;color:#185FA5}
+.cal-dot.done{background:var(--gbg);color:var(--green)}
+
+/* DEPT PAGE */
+.dept-bar-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.5rem}
+.dept-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dept-bar-name{font-size:.88rem;font-weight:600;color:var(--accent)}
+.dept-bar-stat{font-size:.75rem;color:var(--muted)}
+.dbar{height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.dbar-fill{height:100%;border-radius:4px;background:var(--green);transition:width .4s}
+
+/* HISTORY */
+.mitem{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.5rem;cursor:pointer}
+.mitem:hover{border-color:#3498db}
+.mtop{display:flex;justify-content:space-between;align-items:center}
+.mdate{font-size:.75rem;color:var(--muted)}
+.mprev{font-size:.8rem;color:var(--muted);margin-top:4px}
 
 /* MODAL */
-.overlay{position:fixed;inset:0;background:#00000099;z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
-.overlay.on{display:flex;}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;}
-.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.mt2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:440px;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:1rem;color:var(--accent);margin-bottom:1rem}
+.mpreview{background:var(--bg);border-radius:8px;padding:.75rem;font-size:.8rem;margin-bottom:1rem;color:var(--muted);border-left:3px solid var(--accent);line-height:1.5}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+.mbtn-cancel{padding:.5rem 1rem;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer;font-size:.85rem}
+.mbtn-ok{padding:.5rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:700}
 
-.loading{text-align:center;color:var(--muted);padding:40px;font-size:13px;}
-.empty{text-align:center;color:var(--muted);padding:50px 20px;}
-.ei{font-size:36px;margin-bottom:10px;}
-#toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;transform:translateY(60px);opacity:0;transition:.3s;pointer-events:none;max-width:320px;}
-#toast.on{transform:translateY(0);opacity:1;}
-@media(max-width:700px){#sb{display:none;}#mc{padding:14px;}.wgrid{grid-template-columns:1fr 1fr;}.r2{grid-template-columns:1fr;}.fpg{grid-template-columns:1fr;}}
+/* NOTIF */
+.notif{position:fixed;bottom:1.5rem;right:1.5rem;color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:.85rem;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:slin .3s ease}
+.notif.ok{background:var(--green)}
+.notif.err{background:var(--red)}
+.notif.info{background:var(--accent)}
+@keyframes slin{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:.9rem}
+.perm-warn{background:#fef9ec;border:1px solid #f0c050;border-radius:8px;padding:.85rem 1rem;font-size:.85rem;color:#7a5c00;margin-bottom:1rem}
+.section-sep{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:.75rem 0 .5rem;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* toggle */
+.toggle-row{display:flex;gap:6px;margin-bottom:1rem}
+.toggle-btn{padding:5px 14px;border-radius:20px;font-size:.75rem;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--muted)}
+.toggle-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
-<div class="aw" id="authWrap">
-  <div class="ab">
-    <div class="alogo">C.Factory</div>
-    <div class="asub">Üretim Toplantı Takip Sistemi · v3.0</div>
-    <div class="atabs">
-      <button class="atab on" onclick="swAuth('login',this)">Giriş Yap</button>
-      <button class="atab" onclick="swAuth('reg',this)">Kayıt Ol</button>
-      <button class="atab" onclick="swAuth('reset',this)">Şifremi Unuttum</button>
+<!-- LOGIN -->
+<div id="login">
+  <div class="logo">
+    <h1>C.FACTORY</h1>
+    <p>Toplantı & Görev Takip · v4.0</p>
+  </div>
+  <div class="lcard">
+    <h2>Sisteme Giriş</h2>
+    <div class="fg"><label>Adınız Soyadınız</label><input id="l-name" type="text" placeholder="Ad Soyad..."/></div>
+    <div class="fg"><label>Bölümünüz</label>
+      <select id="l-dept">
+        <option value="">— Bölüm seçin —</option>
+        <option>Ar-Ge</option><option>Kesici Pres</option><option>Enjeksiyon</option>
+        <option>Bobinaj</option><option>Talaşlı 1</option><option>Talaşlı 2</option>
+        <option>Montaj</option><option>Üretim</option><option>Planlama</option>
+        <option>Nordex</option><option>Satış</option><option>Orta Gerilim</option>
+        <option>Bakım</option><option>Kalite</option><option>Lojistik</option><option>Yönetim</option>
+      </select>
     </div>
-    <div id="aerr" class="aerr"></div>
-    <div id="aok" class="aok"></div>
-
-    <div id="fLogin">
-      <label class="fl">E-Posta</label>
-      <input class="fi" type="email" id="lEmail" placeholder="ad@sirket.com">
-      <label class="fl">Şifre</label>
-      <input class="fi" type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn-auth" onclick="doLogin()">Giriş Yap →</button>
+    <div class="fg"><label>Rolünüz</label>
+      <select id="l-role">
+        <option value="izleyici">İzleyici</option>
+        <option value="editor">Editör</option>
+        <option value="admin">Admin</option>
+      </select>
     </div>
-
-    <div id="fReg" style="display:none">
-      <label class="fl">Ad Soyad</label>
-      <input class="fi" type="text" id="rName" placeholder="Ad Soyad">
-      <label class="fl">E-Posta</label>
-      <input class="fi" type="email" id="rEmail" placeholder="ad@sirket.com">
-      <label class="fl">Bölüm</label>
-      <select class="fi" id="rDept"><option value="">— Seçin —</option></select>
-      <label class="fl">Şifre (en az 6 karakter)</label>
-      <input class="fi" type="password" id="rPass" placeholder="••••••••">
-      <button class="btn-auth" onclick="doReg()">Kayıt Ol →</button>
-    </div>
-
-    <div id="fReset" style="display:none">
-      <label class="fl">E-Posta Adresiniz</label>
-      <input class="fi" type="email" id="rsEmail" placeholder="ad@sirket.com">
-      <button class="btn-auth" onclick="doReset()">Sıfırlama Maili Gönder →</button>
-    </div>
+    <div class="fg"><label>Şifre</label><input id="l-pass" type="password" placeholder="Şifre..." onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="lbtn" onclick="doLogin()">Giriş Yap →</button>
+    <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app">
-  <header>
-    <div class="logo">C.Factory<span class="ver">v3.0</span></div>
-    <div class="uchip">
-      <div class="av" id="hAv"></div>
-      <span id="hName"></span>
-      <span id="hDept" style="color:var(--muted);font-size:12px;"></span>
-      <span class="crole" id="hRole"></span>
-      <button class="blogout" onclick="doLogout()">⏻</button>
+<div id="app" style="display:none;height:100vh;flex-direction:column">
+  <div id="hdr">
+    <div class="hbrand">C.FACTORY <span>v4</span></div>
+    <div class="hright">
+      <span class="dot"></span>
+      <span class="ubadge" id="h-user">—</span>
+      <button class="lout-btn" onclick="doLogout()">Çıkış</button>
     </div>
-  </header>
-  <div class="abody">
-    <div id="sb">
-      <div class="ss">Ana</div>
-      <div class="si on" id="siToday" onclick="showPage('today',this)"><span class="sico">📋</span>Bugün<span class="sbadge" id="acilB" style="display:none">!</span></div>
-      <div class="si" onclick="showPage('history',this)"><span class="sico">🗂</span>Geçmiş</div>
-      <div class="si" onclick="showPage('depts',this)"><span class="sico">📊</span>Bölüm Özeti</div>
-      <div class="si ao" onclick="showPage('new',this)" style="display:none"><span class="sico">➕</span>Toplantı Ekle</div>
-      <div class="si ao" onclick="showPage('users',this)" style="display:none"><span class="sico">👥</span>Kullanıcılar</div>
-      <div class="sdiv"></div>
-      <div class="ss">Bölümler</div>
-      <div id="deptLinks"></div>
+  </div>
+  <div id="body">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sb-section">Ana Menü</div>
+      <div class="sb-item active" data-page="dashboard" onclick="goPage(this)">📋 Bugünün Görevleri</div>
+      <div class="sb-item" data-page="new-meeting" onclick="goPage(this)">➕ Toplantı Ekle</div>
+      <div class="sb-item" data-page="history" onclick="goPage(this)">📅 Geçmiş</div>
+      <div class="sb-item" data-page="all-depts" onclick="goPage(this)">🏭 Tüm Bölümler</div>
+      <div class="sb-section">Bölümler</div>
+      <div id="dept-links"></div>
     </div>
-
-    <div id="mc">
-
-      <!-- TODAY -->
-      <div class="page on" id="page-today">
-        <div class="ph">
-          <div class="pt">Bugünün <em>Görevleri</em></div>
-          <span id="todayLbl" style="font-size:13px;color:var(--muted);"></span>
-        </div>
-        <div class="frow">
-          <button class="fb on" onclick="flt('hepsi',this)">Hepsi</button>
-          <button class="fb" onclick="flt('acil',this)">🔴 Acil</button>
-          <button class="fb" onclick="flt('devam',this)">🔵 Devam</button>
-          <button class="fb" onclick="flt('bekliyor',this)">⏳ Bekliyor</button>
-          <button class="fb" onclick="flt('sevk',this)">📤 Sevk</button>
-        </div>
-        <div id="todayList"><div class="loading">Yükleniyor…</div></div>
-      </div>
-
-      <!-- HISTORY -->
-      <div class="page" id="page-history">
-        <div class="ph"><div class="pt">Geçmiş <em>Toplantılar</em></div></div>
-        <div id="histList"><div class="loading">Yükleniyor…</div></div>
-      </div>
-
-      <!-- DEPTS -->
-      <div class="page" id="page-depts">
-        <div class="ph"><div class="pt">Bölüm <em>Özeti</em></div></div>
-        <div id="dGrid" class="dgrid"></div>
-      </div>
-
-      <!-- NEW MEETING -->
-      <div class="page" id="page-new">
-        <div class="ph"><div class="pt">Yeni <em>Toplantı</em></div></div>
-        <div class="fbox">
-          <div class="r2">
-            <div><label class="fl">Başlık</label><input class="fi" type="text" id="nTitle" placeholder="Üretim Toplantısı"></div>
-            <div><label class="fl">Tarih</label><input class="fi" type="date" id="nDate"></div>
-          </div>
-          <label class="fl">Görevler / Aksiyon Maddeleri</label>
-          <div id="tiCont"></div>
-          <button class="btn bg" onclick="addTI()" style="margin-top:6px;">+ Görev Ekle</button>
-          <div style="display:flex;justify-content:flex-end;margin-top:20px;">
-            <button class="btn bp" onclick="saveMtg()">💾 Kaydet & Yayınla</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- USERS -->
-      <div class="page" id="page-users">
-        <div class="ph">
-          <div class="pt">Kullanıcı <em>Yönetimi</em></div>
-          <button class="btn bg" onclick="loadUsers()">🔄 Yenile</button>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;">
-          <table class="utable">
-            <thead><tr><th>Ad Soyad</th><th>E-Posta</th><th>Bölüm</th><th>Rol</th><th>Kayıt Tarihi</th></tr></thead>
-            <tbody id="uBody"><tr><td colspan="5" class="loading">Yükleniyor…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- DEPT PAGE -->
-      <div class="page" id="page-dept">
-        <div class="ph">
-          <div class="pt" id="dptTitle">Bölüm</div>
-          <div class="tg">
-            <button class="tgb on" id="tgW" onclick="setCV('week')">Haftalık</button>
-            <button class="tgb" id="tgM" onclick="setCV('month')">Aylık</button>
-          </div>
-        </div>
-        <div class="ctbar">
-          <button class="btn bg" onclick="cNav(-1)">‹</button>
-          <div class="ctitle" id="cTitle"></div>
-          <button class="btn bg" onclick="cNav(1)">›</button>
-          <button class="btn bg" onclick="cToday()">Bugün</button>
-        </div>
-        <div id="cCont"></div>
-        <div style="margin-top:24px;">
-          <div class="pt" style="font-size:15px;margin-bottom:14px;">Açık <em>Görevler</em></div>
-          <div id="dTList"></div>
-        </div>
-      </div>
-
+    <!-- MAIN -->
+    <div id="main">
+      <div id="page-dashboard"></div>
+      <div id="page-new-meeting" style="display:none"></div>
+      <div id="page-history" style="display:none"></div>
+      <div id="page-all-depts" style="display:none"></div>
+      <div id="page-dept" style="display:none"></div>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- SEVK MODAL -->
+<div id="sevk-overlay" class="overlay" style="display:none">
+  <div class="modal">
+    <h3>Bölüme Sevk Et</h3>
+    <div class="mpreview" id="sevk-preview"></div>
+    <div class="fg"><label>Sevk edilecek bölüm</label>
+      <select id="sm-dept">
+        <option>Ar-Ge</option><option>Kesici Pres</option><option>Enjeksiyon</option>
+        <option>Bobinaj</option><option>Talaşlı 1</option><option>Talaşlı 2</option>
+        <option>Montaj</option><option>Üretim</option><option>Planlama</option>
+        <option>Nordex</option><option>Satış</option><option>Orta Gerilim</option>
+        <option>Bakım</option><option>Kalite</option><option>Lojistik</option><option>Yönetim</option>
+      </select>
+    </div>
+    <div class="fg"><label>Sorumlu kişi</label><input type="text" id="sm-person" placeholder="İsim..."/></div>
+    <div class="fg"><label>Termin tarihi</label><input type="date" id="sm-date"/></div>
+    <div class="fg"><label>Not</label><input type="text" id="sm-note" placeholder="Sevk notu..."/></div>
+    <div class="mbtns">
+      <button class="mbtn-cancel" onclick="closeSevk()">İptal</button>
+      <button class="mbtn-ok" onclick="confirmSevk()">Sevk Et ✓</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// ══════════════════════════════════
+// ════════════════════════════════
+// CONFIG
+// ════════════════════════════════
 const SUPABASE_URL  = 'https://uyvbutaozsybpjvmahqf.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5dmJ1dGFvenN5YnBqdm1haHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzQyNzAsImV4cCI6MjA5NjUxMDI3MH0.xPsAQo-PwOe1oGBrp8rxBGdeG0u71fjmvE2i7UdjCuU';
-// ══════════════════════════════════
 
-const {createClient} = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+// Şifreler — istersen değiştir
+const PASSWORDS = {
+  izleyici: 'cfactory2024',
+  editor:   'editor2024',
+  admin:    'admin2024'
+};
 
-const DEPTS=['AR-GE','Kesici Pres','Enjeksiyon','Bobinaj','Talaşlı 1','Talaşlı 2','Montaj','Üretim','Planlama','Nordex','Satış','Orta Gerilim','Kalite','Bakım','Lojistik','Satın Alma','İK','Muhasebe','Genel Müdürlük','Diğer'];
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let cu=null, prof=null;
-let todayFlt='hepsi', todayTasks=[], todayMid=null;
-let rtCh=null, calView='week', calDate=new Date();
-let aDept=null, dTasks=[], tic=0;
+const DEPTS = ['Ar-Ge','Kesici Pres','Enjeksiyon','Bobinaj','Talaşlı 1','Talaşlı 2',
+  'Montaj','Üretim','Planlama','Nordex','Satış','Orta Gerilim','Bakım','Kalite','Lojistik','Yönetim'];
 
-// ── INIT ──
-;(async()=>{
-  const sel=document.getElementById('rDept');
-  DEPTS.forEach(d=>sel.innerHTML+=`<option value="${d}">${d}</option>`);
-  document.getElementById('nDate').value=new Date().toISOString().split('T')[0];
-  document.getElementById('todayLbl').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let user = null;
+let meetings = [];
+let activePage = 'dashboard';
+let activeDept = null;
+let activeFilter = 'hepsi';
+let calYear, calMonth;
+let sevkMid = null, sevkTid = null;
 
-  db.auth.onAuthStateChange(async(_,sess)=>{
-    if(sess){ cu=sess.user; await fetchProf(); if(prof) startApp(); else showAuth(); }
-    else { cu=null; prof=null; showAuth(); }
-  });
-
-  const {data:{session}}=await db.auth.getSession();
-  if(session){ cu=session.user; await fetchProf(); if(prof) startApp(); }
-})();
-
-async function fetchProf(){
-  const {data,error}=await db.from('user_profiles').select('*').eq('id',cu.id).single();
-  if(error||!data){ prof=null; return; }
-  prof=data;
+// ════════════════════════════════
+// LOGIN
+// ════════════════════════════════
+function doLogin(){
+  const name = document.getElementById('l-name').value.trim();
+  const dept = document.getElementById('l-dept').value;
+  const role = document.getElementById('l-role').value;
+  const pass = document.getElementById('l-pass').value;
+  const lerr = document.getElementById('lerr');
+  if(!name || !dept){ lerr.textContent='İsim ve bölüm zorunlu.'; lerr.style.display='block'; return; }
+  if(pass !== PASSWORDS[role]){ lerr.textContent='Şifre yanlış.'; lerr.style.display='block'; return; }
+  lerr.style.display='none';
+  user = { name, dept, role };
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('h-user').textContent = name + ' · ' + dept;
+  buildSidebar();
+  loadData();
+  subscribeRt();
+}
+function doLogout(){
+  user = null; meetings = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('l-pass').value = '';
 }
 
-// ── AUTH ──
-function swAuth(tab,btn){
-  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('fLogin').style.display=tab==='login'?'block':'none';
-  document.getElementById('fReg').style.display=tab==='reg'?'block':'none';
-  document.getElementById('fReset').style.display=tab==='reset'?'block':'none';
-  hideMsg();
-}
-function showErr(m){const e=document.getElementById('aerr');e.textContent=m;e.style.display='block';document.getElementById('aok').style.display='none';}
-function showOk(m){const e=document.getElementById('aok');e.textContent=m;e.style.display='block';document.getElementById('aerr').style.display='none';}
-function hideMsg(){document.getElementById('aerr').style.display='none';document.getElementById('aok').style.display='none';}
-
-async function doLogin(){
-  const email=document.getElementById('lEmail').value.trim();
-  const pass=document.getElementById('lPass').value;
-  if(!email||!pass){showErr('E-posta ve şifre gerekli.');return;}
-  const {error}=await db.auth.signInWithPassword({email,password:pass});
-  if(error) showErr('E-posta veya şifre hatalı.');
+// ════════════════════════════════
+// SUPABASE
+// ════════════════════════════════
+async function loadData(){
+  const { data, error } = await sb.from('meetings').select('*, tasks(*)').order('date',{ascending:false});
+  if(error){ notif('Veri yüklenemedi','err'); return; }
+  meetings = data || [];
+  renderPage(activePage);
 }
 
-async function doReg(){
-  const name=document.getElementById('rName').value.trim();
-  const email=document.getElementById('rEmail').value.trim();
-  const dept=document.getElementById('rDept').value;
-  const pass=document.getElementById('rPass').value;
-  if(!name||!email||!dept||!pass){showErr('Tüm alanları doldurun.');return;}
-  if(pass.length<6){showErr('Şifre en az 6 karakter olmalı.');return;}
-
-  // Kaç kullanıcı var? İlk kullanıcı admin olsun
-  const {count}=await db.from('user_profiles').select('*',{count:'exact',head:true});
-  const isFirst=count===0;
-
-  const {data,error}=await db.auth.signUp({email,password:pass,options:{data:{full_name:name,department:dept}}});
-  if(error){showErr(error.message);return;}
-
-  if(data.user){
-    // Profil trigger ile oluşuyor ama ilk kullanıcıyı admin yap
-    if(isFirst){
-      await db.from('user_profiles').update({role:'admin'}).eq('id',data.user.id);
-    }
-    showOk('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-  }
-}
-
-async function doReset(){
-  const email=document.getElementById('rsEmail').value.trim();
-  if(!email){showErr('E-posta adresinizi girin.');return;}
-  const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
-  if(error) showErr(error.message);
-  else showOk('Şifre sıfırlama maili gönderildi!');
-}
-
-function showAuth(){
-  document.getElementById('authWrap').style.display='flex';
-  document.getElementById('app').style.display='none';
-}
-
-async function doLogout(){
-  await db.auth.signOut();
-  if(rtCh) db.removeChannel(rtCh);
-}
-
-// ── START APP ──
-function startApp(){
-  document.getElementById('authWrap').style.display='none';
-  document.getElementById('app').style.display='flex';
-  const av=(prof.full_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('hAv').textContent=av;
-  document.getElementById('hName').textContent=prof.full_name;
-  document.getElementById('hDept').textContent='· '+prof.department;
-  document.getElementById('hRole').textContent=prof.role==='admin'?'Admin':prof.role==='editor'?'Editör':'İzleyici';
-  if(prof.role==='admin') document.querySelectorAll('.ao').forEach(e=>e.style.display='');
-  buildDeptLinks();
-  subscribeRT();
-  loadToday();
-}
-
-function buildDeptLinks(){
-  document.getElementById('deptLinks').innerHTML=DEPTS.map(d=>
-    `<div class="si" onclick="openDept('${esc(d)}',this)"><span class="sico">🏭</span>${d}</div>`
-  ).join('');
-}
-
-function subscribeRT(){
-  rtCh=db.channel('cfrt')
-    .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>{loadToday();if(aDept)loadDept(aDept);})
-    .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>{loadToday();})
+function subscribeRt(){
+  sb.channel('cf-rt')
+    .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},()=>loadData())
+    .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>loadData())
     .subscribe();
 }
 
-// ── PAGES ──
-function showPage(id,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.si').forEach(s=>s.classList.remove('on'));
-  document.getElementById('page-'+id).classList.add('on');
-  if(el) el.classList.add('on');
-  if(id==='history') loadHist();
-  if(id==='depts') loadDeptsOv();
-  if(id==='new') initForm();
-  if(id==='users') loadUsers();
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+function buildSidebar(){
+  const el = document.getElementById('dept-links');
+  el.innerHTML = DEPTS.map(d =>
+    `<div class="sb-item" data-page="dept" data-dept="${d}" onclick="goDept('${d}',this)">${d}</div>`
+  ).join('');
 }
 
-function openDept(dept,el){
-  aDept=dept; calDate=new Date();
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.si').forEach(s=>s.classList.remove('on'));
-  document.getElementById('page-dept').classList.add('on');
-  if(el) el.classList.add('on');
-  document.getElementById('dptTitle').innerHTML=`<em>${esc(dept)}</em>`;
-  loadDept(dept);
+function goPage(el){
+  activeDept = null;
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  activePage = el.dataset.page;
+  renderPage(activePage);
 }
 
-// ══ TODAY ══
-async function loadToday(){
-  const today=new Date().toISOString().split('T')[0];
-  const {data:mtgs}=await db.from('meetings').select('*').eq('meeting_date',today).order('created_at',{ascending:false});
-  const c=document.getElementById('todayList');
-  if(!mtgs?.length){todayMid=null;todayTasks=[];c.innerHTML='<div class="empty"><div class="ei">📋</div>Bugün toplantı kaydı yok.</div>';return;}
-  todayMid=mtgs[0].id;
-  const {data:tasks}=await db.from('tasks').select('*').eq('meeting_id',todayMid)
-    .not('status','eq','arsiv').not('status','eq','tamamlandi').order('created_at');
-  todayTasks=tasks||[];
-  renderToday();
-  const acil=todayTasks.filter(t=>t.priority==='acil').length;
-  const b=document.getElementById('acilB');
-  b.style.display=acil?'':'none';b.textContent=acil;
+function goDept(dept, el){
+  activeDept = dept;
+  activePage = 'dept';
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderPage('dept');
 }
 
-function renderToday(){
-  const c=document.getElementById('todayList');
-  let list=todayTasks;
-  if(todayFlt==='acil') list=list.filter(t=>t.priority==='acil');
-  else if(todayFlt!=='hepsi') list=list.filter(t=>t.status===todayFlt);
-  if(!list.length){c.innerHTML='<div class="empty"><div class="ei">✅</div>Görev yok.</div>';return;}
-  c.innerHTML=list.map(t=>tHTML(t,true)).join('');
-}
-
-function flt(f,btn){
-  todayFlt=f;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','oa','od','os'));
-  btn.classList.add(f==='acil'?'oa':f==='devam'?'od':f==='sevk'?'os':'on');
-  renderToday();
-}
-
-// ══ TASK HTML ══
-function tHTML(t,interactive){
-  const canE=interactive&&prof&&(prof.role==='editor'||prof.role==='admin');
-  let meta='';
-  if(t.department) meta+=`<span class="badge bdp">🏭 ${esc(t.department)}</span>`;
-  if(t.priority==='acil') meta+=`<span class="badge bac">🔴 ACİL</span>`;
-  if(t.status==='devam') meta+=`<span class="badge bdv">🔵 Devam</span>`;
-  if(t.status==='sevk') meta+=`<span class="badge bsv">📤 → ${esc(t.forwarded_to||'')}</span>`;
-  if(t.assigned_to) meta+=`<span class="basgn">👤 ${esc(t.assigned_to)}</span>`;
-  if(t.due_date){
-    const diff=Math.ceil((new Date(t.due_date)-new Date())/86400000);
-    const cl=diff<0?'dov':diff<=2?'dsn':'dok';
-    const lb=diff<0?`⚠️ ${Math.abs(diff)}g gecikti`:diff===0?'⏰ Bugün':`📅 ${t.due_date}`;
-    meta+=`<span class="${cl}">${lb}</span>`;
-  }
-  if(t.updated_by) meta+=`<span class="bupd">↺ ${esc(t.updated_by)}</span>`;
-
-  let acts='';
-  if(canE){
-    acts=`<div class="tact">
-      <button class="btn bsu" onclick="setSt('${t.id}','tamamlandi')">✅ Tamamlandı</button>
-      ${t.status!=='devam'
-        ?`<button class="btn bi" onclick="setSt('${t.id}','devam')">🔵 Devam Ediyor</button>`
-        :`<button class="btn bg" onclick="setSt('${t.id}','bekliyor')">↩ Bekliyor</button>`}
-      ${t.priority==='acil'
-        ?`<button class="btn bg" onclick="setPr('${t.id}','normal')">Acil Kaldır</button>`
-        :`<button class="btn bd2" onclick="setPr('${t.id}','acil')">🔴 Acil</button>`}
-      <button class="btn bg" onclick="togFP('${t.id}')">📤 Sevk</button>
-    </div>
-    <div class="fp" id="fp-${t.id}">
-      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Sevk Bilgileri</div>
-      <div class="fpg">
-        <div><label class="fl">Bölüm</label><select class="fi" id="fd-${t.id}">${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select></div>
-        <div><label class="fl">Sorumlu</label><input class="fi" type="text" id="fp-${t.id}-p" placeholder="Ad Soyad"></div>
-        <div><label class="fl">Termin</label><input class="fi" type="date" id="fp-${t.id}-d"></div>
-        <div class="fpf"><label class="fl">Not</label><input class="fi" type="text" id="fp-${t.id}-n" placeholder="Açıklama"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn bp" onclick="doFwd('${t.id}')">Sevk Et</button>
-        <button class="btn bg" onclick="togFP('${t.id}')">İptal</button>
-      </div>
-    </div>`;
-  }
-
-  return `<div class="tc s${t.status==='devam'?'d':t.status==='sevk'?'s2':''} ${t.priority==='acil'?'pa':''}" id="tc-${t.id}">
-    <div class="tcont">${esc(t.content)}</div>
-    <div class="tmeta">${meta}</div>
-    ${acts}
-  </div>`;
-}
-
-// ══ ACTIONS ══
-async function setSt(id,status){
-  const u={status,updated_by:prof.full_name,updated_at:new Date().toISOString()};
-  if(status==='tamamlandi') u.completed_at=new Date().toISOString();
-  await db.from('tasks').update(u).eq('id',id);
-  toast(status==='tamamlandi'?'✅ Tamamlandı':'Durum güncellendi');
-}
-async function setPr(id,priority){
-  await db.from('tasks').update({priority,updated_by:prof.full_name}).eq('id',id);
-  toast(priority==='acil'?'🔴 Acil işaretlendi':'Acil kaldırıldı');
-}
-function togFP(id){document.getElementById('fp-'+id)?.classList.toggle('on');}
-async function doFwd(id){
-  const dept=document.getElementById('fd-'+id).value;
-  const person=document.getElementById(`fp-${id}-p`).value;
-  const due=document.getElementById(`fp-${id}-d`).value;
-  const note=document.getElementById(`fp-${id}-n`).value;
-  await db.from('tasks').update({status:'sevk',forwarded_to:dept,assigned_to:person,due_date:due||null,notes:note,updated_by:prof.full_name,updated_at:new Date().toISOString()}).eq('id',id);
-  toast(`📤 ${dept} bölümüne sevk edildi`);
-}
-
-// ══ HISTORY ══
-async function loadHist(){
-  const {data:mtgs}=await db.from('meetings').select('*').order('meeting_date',{ascending:false}).limit(60);
-  const c=document.getElementById('histList');
-  if(!mtgs?.length){c.innerHTML='<div class="empty"><div class="ei">🗂</div>Kayıt yok.</div>';return;}
-  const ids=mtgs.map(m=>m.id);
-  const {data:tasks}=await db.from('tasks').select('id,meeting_id,status,priority').in('meeting_id',ids);
-  c.innerHTML=mtgs.map(m=>{
-    const mt=(tasks||[]).filter(t=>t.meeting_id===m.id);
-    const ok=mt.filter(t=>t.status==='tamamlandi'||t.status==='arsiv').length;
-    const ac=mt.filter(t=>t.priority==='acil').length;
-    const dv=mt.filter(t=>t.status==='devam').length;
-    return `<div class="mcard" onclick="showMtgModal('${m.id}')">
-      <div class="mct"><div class="mdate">${m.meeting_date} — ${esc(m.title||'Toplantı')}</div><div class="mby">${esc(m.created_by||'')}</div></div>
-      <div class="mstats">
-        <span class="sp spt">📋 ${mt.length}</span>
-        ${ok?`<span class="sp spok">✅ ${ok}</span>`:''}
-        ${dv?`<span class="sp spd">🔵 ${dv}</span>`:''}
-        ${ac?`<span class="sp spa">🔴 ${ac}</span>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function showMtgModal(mid){
-  const {data:m}=await db.from('meetings').select('*').eq('id',mid).single();
-  const {data:tasks}=await db.from('tasks').select('*').eq('meeting_id',mid).order('created_at');
-  const ov=document.createElement('div');
-  ov.className='overlay on';
-  ov.innerHTML=`<div class="modal">
-    <div class="mh">
-      <div class="mt2">${esc(m.title)} <span style="color:var(--muted);font-size:13px;">${m.meeting_date}</span></div>
-      <button class="btn bg" onclick="this.closest('.overlay').remove()">✕</button>
-    </div>
-    ${(tasks||[]).map(t=>tHTML(t,false)).join('')}
-  </div>`;
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
-  document.body.appendChild(ov);
-}
-
-// ══ DEPTS OVERVIEW ══
-async function loadDeptsOv(){
-  const {data:tasks}=await db.from('tasks').select('department,status').not('status','eq','arsiv');
-  const c=document.getElementById('dGrid');
-  if(!tasks)return;
-  const map={};
-  DEPTS.forEach(d=>map[d]={total:0,done:0});
-  tasks.forEach(t=>{const d=t.department||'Diğer';if(!map[d])map[d]={total:0,done:0};map[d].total++;if(t.status==='tamamlandi')map[d].done++;});
-  const list=Object.entries(map).filter(([,v])=>v.total>0).sort((a,b)=>b[1].total-a[1].total);
-  if(!list.length){c.innerHTML='<div class="empty"><div class="ei">🏭</div>Veri yok.</div>';return;}
-  c.innerHTML=list.map(([dept,v])=>{
-    const pct=v.total?Math.round(v.done/v.total*100):0;
-    return `<div class="dcard" onclick="openDept('${esc(dept)}',null)">
-      <div class="dcn">${esc(dept)}</div>
-      <div class="pb"><div class="pf" style="width:${pct}%"></div></div>
-      <div class="dcnum">${v.done}/${v.total} · %${pct}</div>
-    </div>`;
-  }).join('');
-}
-
-// ══ DEPT + CALENDAR ══
-async function loadDept(dept){
-  const {data:tasks}=await db.from('tasks').select('*,meetings(meeting_date)').eq('department',dept)
-    .not('status','eq','arsiv').not('status','eq','tamamlandi').order('created_at');
-  dTasks=tasks||[];
-  renderCal();
-  const c=document.getElementById('dTList');
-  if(!dTasks.length){c.innerHTML='<div class="empty"><div class="ei">✅</div>Tüm görevler tamamlandı.</div>';return;}
-  c.innerHTML=dTasks.map(t=>tHTML(t,true)).join('');
-}
-
-function setCV(v){calView=v;document.getElementById('tgW').classList.toggle('on',v==='week');document.getElementById('tgM').classList.toggle('on',v==='month');renderCal();}
-function cNav(d){if(calView==='week')calDate=new Date(calDate.getTime()+d*7*86400000);else{calDate.setMonth(calDate.getMonth()+d);calDate=new Date(calDate);}renderCal();}
-function cToday(){calDate=new Date();renderCal();}
-function renderCal(){calView==='week'?renderWeek():renderMonth();}
-
-function renderWeek(){
-  const d=new Date(calDate),day=d.getDay(),diff=day===0?-6:1-day;
-  d.setDate(d.getDate()+diff);
-  const days=Array.from({length:5},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()+i);return x;});
-  const ts=new Date().toISOString().split('T')[0];
-  document.getElementById('cTitle').textContent=`${days[0].toLocaleDateString('tr-TR',{day:'numeric',month:'long'})} — ${days[4].toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}`;
-  const gT=ds=>dTasks.filter(t=>t.meetings?.meeting_date===ds||t.due_date===ds);
-  document.getElementById('cCont').innerHTML=`<div class="wgrid">${days.map(day=>{
-    const ds=day.toISOString().split('T')[0];
-    const dt=gT(ds);
-    return `<div class="wday">
-      <div class="wdh">${day.toLocaleDateString('tr-TR',{weekday:'short'})}</div>
-      <div class="wdd ${ds===ts?'td':''}">${day.getDate()}</div>
-      ${dt.length?dt.map(t=>`<div class="wtask ${t.priority==='acil'?'pa':''}" title="${esc(t.content)}">${esc(t.content.slice(0,55))}${t.content.length>55?'…':''}</div>`).join(''):'<div class="wempty">—</div>'}
-    </div>`;
-  }).join('')}</div>`;
-}
-
-function renderMonth(){
-  const y=calDate.getFullYear(),mo=calDate.getMonth();
-  document.getElementById('cTitle').textContent=new Date(y,mo,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
-  const fd=new Date(y,mo,1).getDay(),off=fd===0?6:fd-1;
-  const dim=new Date(y,mo+1,0).getDate();
-  const ts=new Date().toISOString().split('T')[0];
-  const gT=ds=>dTasks.filter(t=>t.meetings?.meeting_date===ds||t.due_date===ds);
-  const hdrs=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].map(h=>`<div class="mghdr">${h}</div>`).join('');
-  let cells='';
-  for(let i=0;i<off;i++) cells+=`<div class="mgday oth"></div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dt=gT(ds);
-    cells+=`<div class="mgday ${ds===ts?'tday':''}">
-      <div class="mgnum ${ds===ts?'t':''}">${d}</div>
-      ${dt.map(t=>`<div class="mgdot ${t.priority==='acil'?'pa':t.status==='devam'?'sd':t.status==='sevk'?'ss2':'sb'}" title="${esc(t.content)}">${esc(t.content.slice(0,20))}…</div>`).join('')}
-    </div>`;
-  }
-  document.getElementById('cCont').innerHTML=`<div class="mgrid">${hdrs}${cells}</div>`;
-}
-
-// ══ NEW MEETING ══
-function initForm(){document.getElementById('tiCont').innerHTML='';tic=0;addTI();}
-function addTI(){
-  const id=++tic;
-  const div=document.createElement('div');
-  div.className='trow';div.id='ti-'+id;
-  div.innerHTML=`<textarea placeholder="Görev / toplantı notu…"></textarea>
-    <select class="fi" style="width:140px;"><option value="">Bölüm</option>${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select>
-    <select class="fi" style="width:90px;"><option value="normal">Normal</option><option value="acil">🔴 Acil</option></select>
-    <button class="btn bd2" onclick="document.getElementById('ti-${id}').remove()">✕</button>`;
-  document.getElementById('tiCont').appendChild(div);
-}
-async function saveMtg(){
-  const title=document.getElementById('nTitle').value.trim()||'Üretim Toplantısı';
-  const date=document.getElementById('nDate').value;
-  if(!date){toast('Tarih seçin!','danger');return;}
-  const rows=document.querySelectorAll('#tiCont .trow');
-  const items=[];
-  rows.forEach(r=>{
-    const txt=r.querySelector('textarea').value.trim();
-    const dept=r.querySelectorAll('select')[0].value;
-    const prio=r.querySelectorAll('select')[1].value;
-    if(txt) items.push({content:txt,department:dept||null,priority:prio});
+function renderPage(page){
+  ['dashboard','new-meeting','history','all-depts','dept'].forEach(p=>{
+    document.getElementById('page-'+p).style.display = p===page?'block':'none';
   });
-  if(!items.length){toast('En az 1 görev ekleyin!','danger');return;}
-  const {data:mtg,error}=await db.from('meetings').insert({title,meeting_date:date,created_by:prof.full_name}).select().single();
-  if(error){toast('Hata: '+error.message,'danger');return;}
-  await db.from('tasks').insert(items.map(i=>({meeting_id:mtg.id,...i,status:'bekliyor'})));
-  toast('✅ Toplantı kaydedildi!');
-  showPage('today',document.getElementById('siToday'));
+  if(page==='dashboard')   renderDashboard();
+  if(page==='new-meeting') renderNewMeeting();
+  if(page==='history')     renderHistory();
+  if(page==='all-depts')   renderAllDepts();
+  if(page==='dept')        renderDeptPage();
 }
 
-// ══ USERS ══
-async function loadUsers(){
-  // Tüm auth kullanıcılarını almak için profiles tablosunu kullanıyoruz
-  // E-posta için auth.users'a erişim service_role gerektirir, bu yüzden
-  // kayıt sırasında e-postayı profile'a da kaydedelim
-  const {data:profiles}=await db.from('user_profiles').select('*').order('created_at');
-  const body=document.getElementById('uBody');
-  if(!profiles?.length){body.innerHTML='<tr><td colspan="5" class="loading">Kullanıcı yok.</td></tr>';return;}
-  body.innerHTML=profiles.map(p=>`<tr>
-    <td style="font-weight:500;">${esc(p.full_name)}</td>
-    <td style="color:var(--muted);font-size:12px;">${esc(p.email||'—')}</td>
-    <td>${esc(p.department)}</td>
-    <td>
-      <select class="rsel" onchange="setRole('${p.id}',this.value)">
-        <option value="izleyici" ${p.role==='izleyici'?'selected':''}>👁 İzleyici</option>
-        <option value="editor" ${p.role==='editor'?'selected':''}>✏️ Editör</option>
-        <option value="admin" ${p.role==='admin'?'selected':''}>⚙️ Admin</option>
-      </select>
-    </td>
-    <td style="color:var(--muted);font-size:12px;">${new Date(p.created_at).toLocaleDateString('tr-TR')}</td>
-  </tr>`).join('');
+// ════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════
+function getTodayMeeting(){ return meetings.find(m=>m.date===today()) || meetings[0] || null; }
+
+function renderDashboard(){
+  const m = getTodayMeeting();
+  const el = document.getElementById('page-dashboard');
+  const tasks = m ? (m.tasks||[]) : [];
+  const total=tasks.length, done=tasks.filter(t=>t.status==='tamamlandi').length,
+    acil=tasks.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi').length,
+    sevk=tasks.filter(t=>t.sevk_dept).length;
+
+  let html = `<div class="ph">
+    <div><h2>${m ? (m.title||'Bugünün Toplantısı') : 'Bugün'}</h2>
+    <div class="ph-sub">${new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>
+  </div>`;
+
+  if(!m){ html += '<div class="empty">📋 Bugün için toplantı notu girilmemiş.<br><small>Toplantı Ekle sayfasından ekleyebilirsiniz.</small></div>';
+    el.innerHTML=html; return; }
+
+  html += `<div class="stats">
+    <div class="scard"><div class="snum">${total}</div><div class="slbl">Toplam</div></div>
+    <div class="scard"><div class="snum g">${done}</div><div class="slbl">Tamamlandı</div></div>
+    <div class="scard"><div class="snum r">${acil}</div><div class="slbl">Acil</div></div>
+    <div class="scard"><div class="snum o">${total-done}</div><div class="slbl">Bekliyor</div></div>
+    <div class="scard"><div class="snum p">${sevk}</div><div class="slbl">Sevk</div></div>
+  </div>
+  <div class="filters">
+    <button class="fbtn ${activeFilter==='hepsi'?'active':''}" onclick="setFilter('hepsi',this)">Hepsi</button>
+    <button class="fbtn ${activeFilter==='acil'?'active':''}" onclick="setFilter('acil',this)">🔴 Acil</button>
+    <button class="fbtn ${activeFilter==='bekliyor'?'active':''}" onclick="setFilter('bekliyor',this)">🔵 Bekliyor</button>
+    <button class="fbtn ${activeFilter==='tamamlandi'?'active':''}" onclick="setFilter('tamamlandi',this)">✅ Tamamlandı</button>
+    <button class="fbtn ${activeFilter==='sevk'?'active':''}" onclick="setFilter('sevk',this)">🔗 Sevk</button>
+  </div>`;
+
+  let filtered = tasks;
+  if(activeFilter==='acil') filtered=tasks.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi');
+  else if(activeFilter==='bekliyor') filtered=tasks.filter(t=>t.status==='bekliyor');
+  else if(activeFilter==='tamamlandi') filtered=tasks.filter(t=>t.status==='tamamlandi');
+  else if(activeFilter==='sevk') filtered=tasks.filter(t=>t.sevk_dept);
+
+  if(!filtered.length) html += '<div class="empty">Bu filtrede görev yok.</div>';
+  else html += filtered.map(t=>taskCard(t,m.id)).join('');
+
+  el.innerHTML = html;
 }
 
-async function setRole(uid,role){
-  const {error}=await db.from('user_profiles').update({role}).eq('id',uid);
-  if(error) toast('Hata: '+error.message,'danger');
-  else{ toast(`✅ Rol güncellendi: ${role}`); loadUsers(); }
+function setFilter(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.filters .fbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderDashboard();
 }
 
-// ══ UTILS ══
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function toast(msg,type){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.style.borderColor=type==='danger'?'var(--danger)':'var(--accent)';
-  t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3200);
+// ════════════════════════════════
+// TASK CARD
+// ════════════════════════════════
+function taskCard(t, mid){
+  const isDone = t.status==='tamamlandi';
+  const isSevk = !!t.sevk_dept;
+  const cls = isDone?'done':isSevk?'sevk':t.priority==='acil'?'acil':'normal';
+  const canEdit = user && (user.role==='editor'||user.role==='admin');
+  const ts = t.termin ? termSt(t.termin) : null;
+  return `<div class="tcard ${cls}">
+    <div class="ttop">
+      <div class="chk ${isDone?'done':isSevk?'sevk':''}"
+        onclick="${canEdit?`toggleDone('${mid}','${t.id}')`:``}" style="${!canEdit?'cursor:default':''}">
+        ${isDone?'✓':isSevk?'→':''}
+      </div>
+      <div class="tbody">
+        <div class="ttext ${isDone?'done':''}">${esc(t.text)}</div>
+        <div class="tmeta">
+          ${t.dept?`<span class="tag t-dept">${t.dept}</span>`:''}
+          <span class="tag t-${t.priority}">${t.priority==='acil'?'🔴 Acil':'🔵 Normal'}</span>
+          ${isDone?'<span class="tag t-done">✅ Tamamlandı</span>':''}
+          ${isSevk?`<span class="tag t-sevk">→ ${t.sevk_dept}</span>`:''}
+          ${t.sorumlu?`<span class="tag t-person">👤 ${t.sorumlu}</span>`:''}
+        </div>
+        ${canEdit&&!isDone?`<div class="tactions">
+          <button class="abtn g" onclick="toggleDone('${mid}','${t.id}')">✓ Tamamlandı</button>
+          <button class="abtn p" onclick="openSevk('${mid}','${t.id}')">→ Sevke Gönder</button>
+          ${t.priority==='acil'
+            ?`<button class="abtn" onclick="setPrio('${t.id}','normal')">Normal yap</button>`
+            :`<button class="abtn r" onclick="setPrio('${t.id}','acil')">🔴 Acil işaretle</button>`}
+        </div>`:''}
+        ${t.updated_by?`<div style="font-size:.67rem;color:var(--muted);margin-top:4px">Son: ${t.updated_by}</div>`:''}
+      </div>
+    </div>
+    <div class="tfoot">
+      <span>${t.sevk_note?'📝 '+esc(t.sevk_note):''}</span>
+      ${ts?`<span class="termin t-${ts}">${fmt(t.termin)} — ${termLbl(ts)}</span>`:
+           t.termin?`<span class="termin t-ok">${fmt(t.termin)}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════
+// TASK ACTIONS
+// ════════════════════════════════
+async function toggleDone(mid,tid){
+  const m=meetings.find(x=>x.id===mid); const t=(m.tasks||[]).find(x=>x.id===tid);
+  const ns=t.status==='tamamlandi'?'bekliyor':'tamamlandi';
+  const by=user.name+' ('+new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+')';
+  const{error}=await sb.from('tasks').update({status:ns,updated_by:by}).eq('id',tid);
+  if(error) notif('Hata: '+error.message,'err');
+  else notif(ns==='tamamlandi'?'✅ Tamamlandı!':'↩ Geri alındı','ok');
+}
+
+async function setPrio(tid,prio){
+  const{error}=await sb.from('tasks').update({priority:prio,updated_by:user.name}).eq('id',tid);
+  if(error) notif('Hata','err');
+  else notif(prio==='acil'?'🔴 Acil işaretlendi':'Normale alındı','info');
+}
+
+function openSevk(mid,tid){
+  sevkMid=mid; sevkTid=tid;
+  const m=meetings.find(x=>x.id===mid); const t=(m.tasks||[]).find(x=>x.id===tid);
+  document.getElementById('sevk-preview').textContent=t.text.substring(0,120);
+  document.getElementById('sm-dept').value=t.dept||DEPTS[0];
+  document.getElementById('sm-person').value=t.sorumlu||'';
+  document.getElementById('sm-date').value=t.termin||today();
+  document.getElementById('sm-note').value=t.sevk_note||'';
+  document.getElementById('sevk-overlay').style.display='flex';
+}
+function closeSevk(){ document.getElementById('sevk-overlay').style.display='none'; }
+async function confirmSevk(){
+  const p={sevk_dept:document.getElementById('sm-dept').value,
+    sorumlu:document.getElementById('sm-person').value,
+    termin:document.getElementById('sm-date').value||null,
+    sevk_note:document.getElementById('sm-note').value,
+    updated_by:user.name};
+  const{error}=await sb.from('tasks').update(p).eq('id',sevkTid);
+  if(error) notif('Hata','err');
+  else notif('✈️ '+p.sevk_dept+' bölümüne sevk edildi!','ok');
+  closeSevk();
+}
+
+// ════════════════════════════════
+// NEW MEETING
+// ════════════════════════════════
+function renderNewMeeting(){
+  const el = document.getElementById('page-new-meeting');
+  if(user.role!=='admin'){
+    el.innerHTML='<div class="perm-warn">⚠️ Toplantı eklemek için <strong>Admin</strong> rolüyle giriş yapın.</div>';
+    return;
+  }
+  el.innerHTML=`<div class="fcard">
+    <h3>Yeni Toplantı Notları</h3>
+    <div class="irow">
+      <div class="fg"><label>Tarih</label><input type="date" id="m-date" value="${today()}"/></div>
+      <div class="fg"><label>Başlık</label><input type="text" id="m-title" placeholder="Günlük Üretim Toplantısı"/></div>
+    </div>
+    <div class="fg" style="margin-top:.75rem"><label>Genel Notlar</label><textarea id="m-notes" placeholder="Toplantıda görüşülen genel notlar..."></textarea></div>
+    <div style="margin-top:1rem">
+      <div class="section-sep">Görevler / Aksiyon Maddeleri</div>
+      <div id="task-rows"></div>
+      <button class="add-row-btn" onclick="addRow()">+ Yeni görev ekle</button>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitMeeting()">Toplantıyı Kaydet & Yayınla</button>
+  </div>`;
+}
+
+function addRow(){
+  const id='r'+Date.now();
+  const div=document.createElement('div');
+  div.className='trow'; div.id=id;
+  div.innerHTML=`
+    <input class="big" type="text" placeholder="Görev açıklaması..."/>
+    <select>${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select>
+    <select><option value="normal">Normal</option><option value="acil">🔴 Acil</option></select>
+    <input type="date" title="Termin"/>
+    <button class="rm-btn" onclick="document.getElementById('${id}').remove()">✕</button>`;
+  document.getElementById('task-rows').appendChild(div);
+}
+
+async function submitMeeting(){
+  const date=document.getElementById('m-date').value;
+  if(!date){notif('Tarih seçin','err');return;}
+  const title=document.getElementById('m-title').value||'Günlük Üretim Toplantısı';
+  const notes=document.getElementById('m-notes').value;
+  const btn=document.getElementById('submit-btn'); btn.disabled=true;
+
+  const{data:mData,error:mErr}=await sb.from('meetings')
+    .upsert({date,title,notes,created_by:user.name},{onConflict:'date'})
+    .select().single();
+  if(mErr){notif('Hata: '+mErr.message,'err');btn.disabled=false;return;}
+
+  const rows=document.querySelectorAll('#task-rows .trow');
+  const tasks=[];
+  rows.forEach((r,i)=>{
+    const inp=r.querySelectorAll('input[type=text],select,input[type=date]');
+    const text=inp[0]?.value?.trim(); if(!text)return;
+    tasks.push({meeting_id:mData.id,text,dept:inp[1]?.value,priority:inp[2]?.value,
+      status:'bekliyor',termin:inp[3]?.value||null,created_by:user.name});
+  });
+  if(tasks.length){
+    const{error:tErr}=await sb.from('tasks').insert(tasks);
+    if(tErr){notif('Görev hatası: '+tErr.message,'err');btn.disabled=false;return;}
+  }
+  btn.disabled=false;
+  notif('✅ Toplantı kaydedildi!','ok');
+  // Dash'e geç
+  document.querySelector('.sb-item[data-page="dashboard"]').click();
+}
+
+// ════════════════════════════════
+// HISTORY
+// ════════════════════════════════
+function renderHistory(){
+  const el=document.getElementById('page-history');
+  if(!meetings.length){el.innerHTML='<div class="empty">Henüz toplantı yok.</div>';return;}
+  el.innerHTML=`<div class="ph"><h2>Geçmiş Toplantılar</h2></div>`+
+    meetings.map(m=>`
+      <div class="mitem" onclick="viewMeeting('${m.id}')">
+        <div class="mtop">
+          <strong style="font-size:.88rem">${m.title||'Toplantı'}</strong>
+          <span class="mdate">${fmt(m.date)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span class="mprev">${(m.notes||'').substring(0,80)}</span>
+          <span class="mdate">${(m.tasks||[]).length} görev</span>
+        </div>
+      </div>`).join('');
+}
+
+function viewMeeting(mid){
+  const m=meetings.find(x=>x.id===mid); if(!m)return;
+  const el=document.getElementById('page-dashboard');
+  activePage='dashboard';
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.sb-item[data-page="dashboard"]').classList.add('active');
+  ['dashboard','new-meeting','history','all-depts','dept'].forEach(p=>{
+    document.getElementById('page-'+p).style.display=p==='dashboard'?'block':'none';
+  });
+  const tasks=m.tasks||[];
+  const total=tasks.length,done=tasks.filter(t=>t.status==='tamamlandi').length,
+    acil=tasks.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi').length,sevk=tasks.filter(t=>t.sevk_dept).length;
+  el.innerHTML=`<div class="ph"><div><h2>${m.title||'Toplantı'}</h2>
+    <div class="ph-sub">${fmt(m.date)} tarihli toplantı</div></div></div>
+    <div class="stats">
+      <div class="scard"><div class="snum">${total}</div><div class="slbl">Toplam</div></div>
+      <div class="scard"><div class="snum g">${done}</div><div class="slbl">Tamamlandı</div></div>
+      <div class="scard"><div class="snum r">${acil}</div><div class="slbl">Acil</div></div>
+      <div class="scard"><div class="snum p">${sevk}</div><div class="slbl">Sevk</div></div>
+    </div>`+
+    (tasks.length?tasks.map(t=>taskCard(t,mid)).join(''):'<div class="empty">Bu toplantıda görev yok.</div>');
+}
+
+// ════════════════════════════════
+// ALL DEPTS
+// ════════════════════════════════
+function renderAllDepts(){
+  const all=meetings.flatMap(m=>m.tasks||[]);
+  const el=document.getElementById('page-all-depts');
+  el.innerHTML=`<div class="ph"><h2>Tüm Bölümler</h2></div>`+
+    DEPTS.map(d=>{
+      const dt=all.filter(t=>t.dept===d);
+      const total=dt.length,done=dt.filter(t=>t.status==='tamamlandi').length;
+      const pct=total?Math.round(done/total*100):0;
+      const acil=dt.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi').length;
+      return`<div class="dept-bar-wrap">
+        <div class="dept-bar-top">
+          <span class="dept-bar-name">${d} ${acil?`<span class="tag t-acil" style="font-size:.65rem">🔴 ${acil} acil</span>`:''}</span>
+          <span class="dept-bar-stat">${done}/${total} tamamlandı · %${pct}</span>
+        </div>
+        <div class="dbar"><div class="dbar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+}
+
+// ════════════════════════════════
+// DEPT PAGE (takvim + görevler)
+// ════════════════════════════════
+function renderDeptPage(){
+  if(!activeDept) return;
+  const d = activeDept;
+  const all = meetings.flatMap(m=>(m.tasks||[]).map(t=>({...t,_date:m.date,_mid:m.id})));
+  const dTasks = all.filter(t=>t.dept===d);
+  const total=dTasks.length,done=dTasks.filter(t=>t.status==='tamamlandi').length,
+    acil=dTasks.filter(t=>t.priority==='acil'&&t.status!=='tamamlandi').length,
+    bekliyor=dTasks.filter(t=>t.status==='bekliyor').length;
+
+  const now=new Date();
+  calYear=calYear||now.getFullYear(); calMonth=calMonth||now.getMonth();
+
+  const el=document.getElementById('page-dept');
+  el.innerHTML=`
+    <div class="ph"><h2>🏭 ${d}</h2></div>
+    <div class="stats">
+      <div class="scard"><div class="snum">${total}</div><div class="slbl">Toplam</div></div>
+      <div class="scard"><div class="snum g">${done}</div><div class="slbl">Tamamlandı</div></div>
+      <div class="scard"><div class="snum r">${acil}</div><div class="slbl">Acil</div></div>
+      <div class="scard"><div class="snum o">${bekliyor}</div><div class="slbl">Bekliyor</div></div>
+    </div>
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="tog-cal" onclick="showCalendar()">📅 Takvim</button>
+      <button class="toggle-btn" id="tog-list" onclick="showList()">📋 Liste</button>
+    </div>
+    <div id="dept-calendar">${buildCalendar(dTasks)}</div>
+    <div id="dept-list" style="display:none">${buildDeptList(dTasks)}</div>`;
+}
+
+function showCalendar(){
+  document.getElementById('dept-calendar').style.display='block';
+  document.getElementById('dept-list').style.display='none';
+  document.getElementById('tog-cal').classList.add('active');
+  document.getElementById('tog-list').classList.remove('active');
+}
+function showList(){
+  document.getElementById('dept-calendar').style.display='none';
+  document.getElementById('dept-list').style.display='block';
+  document.getElementById('tog-cal').classList.remove('active');
+  document.getElementById('tog-list').classList.add('active');
+}
+
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  const all=meetings.flatMap(m=>(m.tasks||[]).map(t=>({...t,_date:m.date,_mid:m.id})));
+  const dTasks=all.filter(t=>t.dept===activeDept);
+  document.getElementById('dept-calendar').innerHTML=buildCalendar(dTasks);
+}
+
+function buildCalendar(tasks){
+  const DAYS=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  const mn=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const todayStr=today();
+  const firstDay=new Date(calYear,calMonth,1);
+  let startDow=firstDay.getDay()-1; if(startDow<0)startDow=6;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+
+  // tasks by date
+  const byDate={};
+  tasks.forEach(t=>{
+    const d=t.termin||t._date;
+    if(!d)return;
+    const [y,m]=d.split('-');
+    if(parseInt(y)===calYear&&parseInt(m)-1===calMonth){
+      if(!byDate[d])byDate[d]=[];
+      byDate[d].push(t);
+    }
+  });
+
+  let html=`<div class="cal-wrap">
+    <div class="cal-hdr">
+      <button class="cal-nav" onclick="calNav(-1)">‹</button>
+      <h3>${mn[calMonth]} ${calYear}</h3>
+      <button class="cal-nav" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-grid">`;
+  DAYS.forEach(d=>html+=`<div class="cal-day-hdr">${d}</div>`);
+
+  let cell=0;
+  for(let i=0;i<startDow;i++){html+=`<div class="cal-day other"></div>`;cell++;}
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const ts=byDate[ds]||[];
+    html+=`<div class="cal-day${isToday?' today':''}">
+      <div class="dn">${d}</div>
+      ${ts.slice(0,3).map(t=>`<div class="cal-dot ${t.status==='tamamlandi'?'done':t.priority==='acil'?'acil':'normal'}" title="${t.text}">${t.text.substring(0,20)}</div>`).join('')}
+      ${ts.length>3?`<div style="font-size:.6rem;color:var(--muted)">+${ts.length-3} daha</div>`:''}
+    </div>`;
+    cell++;
+  }
+  const rem=(7-cell%7)%7;
+  for(let i=0;i<rem;i++)html+=`<div class="cal-day other"></div>`;
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildDeptList(tasks){
+  if(!tasks.length) return '<div class="empty">Bu bölüme ait görev yok.</div>';
+  const pending=tasks.filter(t=>t.status!=='tamamlandi');
+  const done=tasks.filter(t=>t.status==='tamamlandi');
+  let html='';
+  if(pending.length){
+    html+=`<div class="section-sep">Aktif Görevler (${pending.length})</div>`;
+    html+=pending.map(t=>taskCard(t,t._mid)).join('');
+  }
+  if(done.length){
+    html+=`<div class="section-sep">Tamamlananlar (${done.length})</div>`;
+    html+=done.map(t=>taskCard(t,t._mid)).join('');
+  }
+  return html;
+}
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmt(d){ if(!d)return''; const[y,m,dd]=d.split('-'); return`${dd}.${m}.${y}`; }
+function termSt(d){
+  const diff=(new Date(d)-new Date(today()))/86400000;
+  return diff<0?'late':diff<=2?'soon':'ok';
+}
+function termLbl(s){ return s==='late'?'Gecikmiş':s==='soon'?'Yaklaşıyor':'Zamanında'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function notif(msg,type='info'){
+  const n=document.createElement('div');
+  n.className='notif '+type; n.textContent=msg;
+  document.body.appendChild(n); setTimeout(()=>n.remove(),3000);
 }
 </script>
 </body>
